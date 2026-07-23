@@ -1,0 +1,2594 @@
+
+================================================================================
+--- PAGE 1 ---
+================================================================================
+LC29H Series    
+Hardware Design  
+GNSS Module Series  
+Version : 1.2
+Date: 2023-01-17 
+Status : Released  
+
+================================================================================
+--- PAGE 2 ---
+================================================================================
+                                           
+                                          GNSS Module Series  
+ 
+ 
+LC29H _Series_ Hardware_Design                                                       1 / 63 
+ 
+ 
+ 
+At Quectel, our aim is to provide timely and comprehensive services to our customers. If you 
+require any assistance, please contact our headquarters:  
+ 
+Quectel Wireless Solutions Co., Ltd.  
+Building 5, Shanghai Business Park Phase III (Area B), No.1016 Tianlin Road, Minhang District, Shanghai 
+200233, China  
+Tel: +86 21 5108 6236  
+Email: info@quectel.com  
+ 
+Or our lo cal offices. For more information, please visit:  
+http://www.quectel.com/support/sales.htm . 
+ 
+For technical support, or to report documentation errors, please visit:  
+http://www.quectel.com/support/technical.htm . 
+Or email us at: support@quectel.com . 
+ 
+Legal Notices  
+We offer information as a service to you. The provided information is based on your requirements and we 
+make every effort to ensure its quality. You agree that you are responsible for using independent analysis 
+and evaluation in designing intended products, and we provide reference designs for illustrative purposes 
+only. Before using any hardware, software or service guided by this document, please read this notice 
+carefully. Even though we employ commercially reasonable efforts to provide the best possible 
+experience, you hereby acknowledge and agree that this document and related service s hereunder are 
+provided to you on an “as available” basis. We may revise or restate this document from time to time at 
+our sole discretion without any prior notice to you.  
+ 
+Use and Disclosure Restrictions  
+License Agreements  
+Documents and information provi ded by us shall be kept confidential, unless specific permission is 
+granted. They shall not be accessed or used for any purpose except as expressly provided herein.  
+ 
+Copyright  
+Our and third -party products hereunder may contain copyrighted material. Such co pyrighted material 
+shall not be copied, reproduced, distributed, merged, published, translated, or modified without prior 
+written consent. We and the third party have exclusive rights over copyrighted material. No license shall 
+be granted or conveyed under  any patents, copyrights, trademarks, or service mark rights. To avoid 
+ambiguities, purchasing in any form cannot be deemed as granting a license other than the normal 
+non-exclusive, royalty -free license to use the material. We reserve the right to take le gal action for 
+noncompliance with abovementioned requirements, unauthorized use, or other illegal or malicious use of 
+the material.  
+================================================================================
+--- PAGE 3 ---
+================================================================================
+                                           
+                                          GNSS Module Series  
+ 
+ 
+LC29H _Series_ Hardware_Design                                                       2 / 63 
+ 
+ 
+ 
+Trademarks  
+Except as otherwise set forth herein, nothing in this document shall be construed as conferring any rights 
+to use  any trademark, trade name or name, abbreviation, or counterfeit product  thereof owned by Quectel 
+or any third party in advertising, publicity, or other aspects.  
+ 
+Third -Party Rights  
+This document may refer to hardware, software and/or documentation owned b y one or more third parties 
+(“third -party materials”). Use of such third -party materials shall be governed by all restrictions and 
+obligations applicable thereto.  
+ 
+We make no warranty or representation, either express or implied, regarding the third -party materials, 
+including but not limited to any implied or statutory, warranties of merchantability or fitness for a particular 
+purpose, quiet enjoyment, system integration, information accuracy, and non -infringement of any 
+third-party intellectual property ri ghts with regard to the licensed technology or use thereof. Nothing herein 
+constitutes a representation or warranty by us to either develop, enhance, modify, distribute, market, sell, 
+offer for sale, or otherwise maintain production of any our products or any other hardware, software, 
+device, tool, information, or product. We moreover disclaim any and all warranties arising from the course 
+of dealing or usage of trade.  
+ 
+Privacy Policy  
+To implement module functionality, certain device data are uploaded to Qu ectel’s or third -party’s servers, 
+including carriers, chipset suppliers or customer -designated servers. Quectel, strictly abiding by the 
+relevant laws and regulations, shall retain, use, disclose or otherwise process relevant data for the 
+purpose of perfor ming the service only or as permitted by applicable laws. Before data interaction with 
+third parties, please be informed of their privacy and data security policy.  
+ 
+Disclaimer  
+a) We acknowledge no liability for any injury or damage arising from the reliance upon the information.  
+b) We shall bear no liability resulting from any inaccuracies or omissions, or from the use of the 
+information contained herein.  
+c) While we have made every effort to ensure that the functions and features under development are 
+free from e rrors, it is possible that they could contain errors, inaccuracies, and omissions. Unless 
+otherwise provided by valid agreement, we make no warranties of any kind, either implied or express, 
+and exclude all liability for any loss or damage suffered in conn ection with the use of features and 
+functions under development, to the maximum extent permitted by law, regardless of whether such 
+loss or damage may have been foreseeable.  
+d) We are not responsible for the accessibility, safety, accuracy, availability, lega lity, or completeness of 
+information, advertising, commercial offers, products, services, and materials on third -party websites 
+and third -party resources.  
+Copyright © Quectel Wireless Solutions Co., Ltd. 202 3. All rights reserved . 
+================================================================================
+--- PAGE 4 ---
+================================================================================
+                                           
+                                          GNSS Module Series  
+ 
+ 
+LC29H _Series_ Hardware_Design                                                       3 / 63 
+ 
+ 
+ 
+Safety Information  
+ 
+The following safety precautions must be observed during all phases of operation, such as usage, service, 
+or repair of any terminal or mobile incorporating  the module. Manufacturers of the terminal should notify 
+users and operating personnel of the following s afety information by incorporating these guidelines into all 
+product manuals. Otherwise, Quectel assumes no liability for customers’ failure to comply with these 
+precautions.  
+ 
+ Ensure that the product may be used in the country and the required environmen t, 
+as well as that it conforms to the local safety and environment al regulations.  
+ Keep away from explosive and flammable materials. The use of electronic 
+products in extreme power supply conditions and locations with potentially 
+explosive atmospheres m ay cause fire and explosion accidents.  
+ The product must be powered by a stable voltage source, and the wiring shall 
+conform to security precautions and fire prevention regulations.  
+ Proper ESD handling procedures must be followed throughout the moun ting, 
+handling and operation of any devices and equipment  that incorporate the module 
+to avoid ESD damages.  
+================================================================================
+--- PAGE 5 ---
+================================================================================
+                                           
+                                          GNSS Module Series  
+ 
+ 
+LC29H _Series_ Hardware_Design                                                       4 / 63 
+ 
+ 
+ 
+About the Document  
+ 
+Revision  History  
+Version  Date  Description  
+- 2021 -05-31 Creation of the document  
+1.0 2022-06-10 First official release  
+1.1 2022-09-02 1. Reserved pins 2 and 4 for  LC29H (DA)  and LC29H (EA) *. 
+2. Updated (or added) product performance paramete rs, including:  
+Power consum ption of LC29H (DA);  
+Sensitivity of LC29H (BA) , LC29H (CA)  and LC29H (DA);  
+TTFF (without AGNSS)  of LC29H (AA) , LC29H (BA) , LC29H (CA)  and   
+LC29H (DA) ; 
+TTFF (with EPO)  of LC29H (AA) , LC29H (BA) , LC29H (CA)  and   
+LC29H (DA) ; 
+Horizontal position accuracy and convergence time  of LC29H (BA)  and 
+LC29H (DA) ; 
+Update rate of LC29H (AA) , LC29H (BA) , LC29H (CA)  and LC29H (DA) ; 
+Accuracy of 1PPS signal  of LC29H (AA) , LC29H (BA) , LC29H (CA) , 
+LC29H (DA)  and LC29H (EA) * (Table 3). 
+3. Updated supply current of LC29H (DA)  (Table 14). 
+1.2 2023-01-17 1. Added the  applicable variant: LC29 H (BS). 
+2. Added  SPI* and UART2 interface s. 
+3. Updated pins 5, 6, 15 and 16 f rom RESERVED to D_SEL1 , D_SEL2 , Document Information  
+Title LC29H Series Hardware Design  
+Subtitle  GNSS Module Series  
+Document Type  Hardware Design  
+Document  Status  Released  
+================================================================================
+--- PAGE 6 ---
+================================================================================
+                                           
+                                          GNSS Module Series  
+ 
+ 
+LC29H _Series_ Hardware_Design                                                       5 / 63 
+ 
+ 
+ 
+Version  Date  Description  
+TXD2 and RXD2, respectively.  
+4. Added  Typ. 1.8V for I/O voltage  (Table 2). 
+5. Added  the notch circuit in the block diagram ( Figure 1). 
+6. Updated the pin 17 of LC29H (BA) and LC29H (CA) from RESERVED to 
+WI* (Chapter s 2 and 4.1.5 ). 
+7. Updated  powered consumpt ion, sensitivity, TTFF (without AGNSS), 
+TTFF (with EPO), horizontal position accuracy, conver gence time and 
+update rate for LC29H (EA) * (Table 3). 
+8. Updated  the velocity  accuracy (Table 3). 
+9. Added the 3.7 V lithium battery reference circuit ( Figure 7). 
+10. Updated the parameters of the recommended antenna specification 
+(Table 9). 
+11. Added the band-pass filter  circuit  and corresponding description  (Chapter 
+5.2). 
+12. Added the absolute maximum rating s of the 1.8V input voltage for V IN_IO 
+and updated the absolute maximum rating  (max imum  value)  of the input 
+power at RF_IN  (Table 11). 
+13. Added  recom mended operating condition s, including:  
+1.8 V digital I/O pin voltage domain ; 
+high-level input voltage  of RESET_N ; 
+VDD_RF output current  (Table 12). 
+14. Updated supply current of LC29H (EA) * (Table 14). 
+15. Added  the mounting direction for the module s (Chapter 8.1.3 ). 
+16. Updated the recommended ramp -to-soak, ramp -up and cool -down 
+slopes ( Figure 28 and Table 17). 
+================================================================================
+--- PAGE 7 ---
+================================================================================
+                                           
+                                          GNSS Module Series  
+ 
+ 
+LC29H _Series_ Hardware_Design                                                       6 / 63 
+ 
+ 
+ 
+Contents  
+Safety Information  ................................ ................................ ................................ ................................ ....... 3 
+About the Documen t ................................ ................................ ................................ ................................ ... 4 
+Contents  ................................ ................................ ................................ ................................ .......................  6 
+Table Index  ................................ ................................ ................................ ................................ ...................  8 
+Figure Index  ................................ ................................ ................................ ................................ .................  9 
+1 Product Description  ................................ ................................ ................................ ...........................  10 
+1.1. Overview ................................ ................................ ................................ ................................ .. 10 
+1.1.1.  Special Marks  ................................ ................................ ................................ .................  11 
+1.2. Features  ................................ ................................ ................................ ................................ .. 12 
+1.3. Performance  ................................ ................................ ................................ ............................  15 
+1.4. Block Diagram  ................................ ................................ ................................ .........................  17 
+1.5. GNSS Constellations  ................................ ................................ ................................ ..............  17 
+1.6. Augmentation System  ................................ ................................ ................................ .............  18 
+1.6.1.  SBAS  ................................ ................................ ................................ ..............................  18 
+1.7. AGNSS  ................................ ................................ ................................ ................................ .... 18 
+1.7.1.  EASY  ................................ ................................ ................................ ..............................  19 
+1.7.2.  EPO  ................................ ................................ ................................ ................................  19 
+1.8. Multi -Tone AIC  ................................ ................................ ................................ ........................  19 
+1.9. RTK ................................ ................................ ................................ ................................ .........  20 
+1.9.1.  RTK Rover  ................................ ................................ ................................ ......................  20 
+1.9.2.  RTK Base Station  ................................ ................................ ................................ ...........  21 
+1.10.  Dead Reckoning Function  ................................ ................................ ................................ ....... 21 
+1.11.  Firmwar e Upgrade ................................ ................................ ................................ ...................  21 
+2 Pin Assignment  ................................ ................................ ................................ ................................ .. 22 
+3 Power Management  ................................ ................................ ................................ ...........................  26 
+3.1. Power Unit  ................................ ................................ ................................ ...............................  26 
+3.2. Power Supply  ................................ ................................ ................................ ..........................  27 
+3.2.1.  VCC  ................................ ................................ ................................ ................................  27 
+3.2.2.  V_BCKP  ................................ ................................ ................................ .........................  28 
+3.3. Power Modes  ................................ ................................ ................................ ..........................  29 
+3.3.1.  Feature Comparison  ................................ ................................ ................................ ...... 29 
+3.3.2.  Continuous Mode  ................................ ................................ ................................ ...........  29 
+3.3.3.  Backup Mode  ................................ ................................ ................................ .................  30 
+3.4. Power -up Sequence  ................................ ................................ ................................ ................  31 
+3.5. Power -down Sequence  ................................ ................................ ................................ ...........  31 
+4 Application Interfaces  ................................ ................................ ................................ .......................  33 
+4.1. I/O Pins  ................................ ................................ ................................ ................................ .... 33 
+4.1.1.  Communication  Interfaces  ................................ ................................ .............................  33 
+4.1.1.1.  Interface Selection (D_SEL1 & D_SEL2)  ................................ ..............................  33 
+================================================================================
+--- PAGE 8 ---
+================================================================================
+                                           
+                                          GNSS Module Series  
+ 
+ 
+LC29H _Series_ Hardware_Design                                                       7 / 63 
+ 
+ 
+ 
+4.1.1.2 . UART1 Interface  ................................ ................................ ................................ .... 34 
+4.1.1.3.  UART2 Interface  ................................ ................................ ................................ .... 34 
+4.1.1.4.  I2C Interface  ................................ ................................ ................................ ..........  35 
+4.1.1.5.  SPI* ................................ ................................ ................................ ........................  36 
+4.1.2.  FWD  ................................ ................................ ................................ ...............................  36 
+4.1.3.  WHEELTICK  ................................ ................................ ................................ ..................  37 
+4.1.4.  1PPS  ................................ ................................ ................................ ..............................  37 
+4.1.5.  WI* ................................ ................................ ................................ ................................ .. 37 
+4.2. System Pins  ................................ ................................ ................................ ............................  37 
+4.2.1.  WAKEUP  ................................ ................................ ................................ ........................  37 
+4.2.2.  RESET_N  ................................ ................................ ................................ .......................  37 
+5 Design  ................................ ................................ ................................ ................................ .................  39 
+5.1. Anten na Selection  ................................ ................................ ................................ ...................  39 
+5.1.1.  Antenna Specifications ................................ ................................ ................................ ... 39 
+5.1.2.  Antenna Selection Guide  ................................ ................................ ...............................  40 
+5.2. Antenna Reference Design  ................................ ................................ ................................ ..... 41 
+5.2.1.  Active Antenna Reference Design  ................................ ................................ .................  41 
+5.2.2.  Passive Antenna R eference Design  ................................ ................................ ..............  42 
+5.3. Coexistence with Cellular Systems  ................................ ................................ .........................  42 
+5.3.1.  In-band Interference  ................................ ................................ ................................ ....... 43 
+5.3.2.  Out-of-band Interference  ................................ ................................ ................................  44 
+5.3.3.  Ensuring Interference Immunity  ................................ ................................ .....................  44 
+5.4. Recommend ed Footprint  ................................ ................................ ................................ .........  46 
+6 Electrical Speci fication  ................................ ................................ ................................ ......................  47 
+6.1. Absolute Maximum Ratings  ................................ ................................ ................................ .... 47 
+6.2. Recommended Operating Conditions  ................................ ................................ .....................  47 
+6.3. Supply Current Requirement ................................ ................................ ................................ ... 49 
+6.4. ESD Protection  ................................ ................................ ................................ ........................  50 
+7 Mechanical Dimensions  ................................ ................................ ................................ ....................  51 
+7.1. Top, Side and Bottom View Dimensions  ................................ ................................ ................  51 
+7.2. Top and Bottom Views  ................................ ................................ ................................ ............  52 
+8 Product H andling  ................................ ................................ ................................ ...............................  53 
+8.1. Packaging  ................................ ................................ ................................ ................................  53 
+8.1.1.  Carrier Tape  ................................ ................................ ................................ ...................  53 
+8.1.2.  Plast ic Reel  ................................ ................................ ................................ ....................  54 
+8.1.3.  Mounting Direction  ................................ ................................ ................................ .........  54 
+8.1.4.  Packaging Process  ................................ ................................ ................................ ........  55 
+8.2. Storage  ................................ ................................ ................................ ................................ .... 56 
+8.3. Manufacturing and Soldering  ................................ ................................ ................................ .. 57 
+9 Labelling Information  ................................ ................................ ................................ ........................  59 
+10 Appendix References  ................................ ................................ ................................ ........................  60 
+================================================================================
+--- PAGE 9 ---
+================================================================================
+                                           
+                                          GNSS Module Series  
+ 
+ 
+LC29H _Series_ Hardware_Design                                                       8 / 63 
+ 
+ 
+ 
+Table Index  
+Table 1: Special Marks  ................................ ................................ ................................ ...............................  11 
+Table 2: Product Fe atures  ................................ ................................ ................................ ..........................  12 
+Table 3: Product Performance  ................................ ................................ ................................ ...................  15 
+Table 4: GNSS Constellatio ns and Frequency Bands  ................................ ................................ ...............  18 
+Table 5: I/O Parameter Definition  ................................ ................................ ................................ ..............  23 
+Table 6: Pin Description  ................................ ................................ ................................ .............................  23 
+Table 7: Feature Comparison in Di fferent Power Modes  ................................ ................................ ..........  29 
+Table 8: Interface Selection by D_SEL1 & D_SEL2  ................................ ................................ ..................  33 
+Table 9: Recommended Antenna Specifications  ................................ ................................ .......................  39 
+Table 10: Intermodulation Distortion (IMD) Products  ................................ ................................ ................  44 
+Table 11: Absolute  Maximum Ratings  ................................ ................................ ................................ ....... 47 
+Table 12: Recommended Operating Condition  ................................ ................................ .........................  48 
+Table 13: Supply Current for LC29H (AA), LC29H (BA) and LC29H ( CA) ................................ ................  49 
+Table 14: Supply Current for LC29H (DA), LC29H (EA)* and LC29H (BS)  ................................ ..............  49 
+Table 15: Carrier Tape Dimension Table (Unit: mm)  ................................ ................................ .................  53 
+Table 16: Plastic Reel Dimension Table (Unit: mm)  ................................ ................................ ..................  54 
+Table 17: Recommended Thermal Profile Parameters  ................................ ................................ .............  58 
+Table 18: Relate d Documents  ................................ ................................ ................................ ....................  60 
+Table 19: Terms and Abbreviations  ................................ ................................ ................................ ...........  60 
+================================================================================
+--- PAGE 10 ---
+================================================================================
+                                           
+                                          GNSS Module Series  
+ 
+ 
+LC29H _Series_ Hardware_Design                                                       9 / 63 
+ 
+ 
+ 
+Figure Index  
+Figure 1: Block Diagram  ................................ ................................ ................................ .............................  17 
+Figure 2: RTK Operation Process  ................................ ................................ ................................ ..............  20 
+Figure 3: Pin Assignment  ................................ ................................ ................................ ...........................  22 
+Figure 4:  Internal Power Supply  ................................ ................................ ................................ .................  26 
+Figure 5: VCC Input Reference Circuit  ................................ ................................ ................................ ...... 27 
+Figure 6: Reference Charging Circuit with Rechargeable Backup  Battery  ................................ ...............  28 
+Figure 7: Reference Charging Circuit with 3.7 V Lithium Battery  ................................ ..............................  28 
+Figure 8: Enter/Exit Backup Mode Sequence  ................................ ................................ ............................  30 
+Figure 9: Power -up Sequence  ................................ ................................ ................................ ...................  31 
+Figure 10: Power -down and Power -on Restar t Sequence  ................................ ................................ ........  32 
+Figure 11: UART1 Interface Reference Design  ................................ ................................ .........................  34 
+Figure 12: I2C Interface Reference Design  ................................ ................................ ...............................  35 
+Figure 13: SPI Ref erence Design  ................................ ................................ ................................ ..............  36 
+Figure 14: Reference OC Circuit for Module Reset  ................................ ................................ ...................  38 
+Figure 15: Reset Sequence  ................................ ................................ ................................ .......................  38 
+Figure 16: Active Antenna Reference Design  ................................ ................................ ............................  41 
+Figure 17: Passive Antenna Reference Design  ................................ ................................ .........................  42 
+Figure 18: In -band Interference on GPS L1  ................................ ................................ ...............................  43 
+Figure 19: Out -of-band Interference on GPS L1  ................................ ................................ ........................  44 
+Figure 20: Interference Source and Its Path  ................................ ................................ ..............................  45 
+Figure 21: Recommended Footprint  ................................ ................................ ................................ ..........  46 
+Figure 22: Top, Side  and Bottom View Dimensions  ................................ ................................ ..................  51 
+Figure 23: Top and Bottom Module Views  ................................ ................................ ................................ . 52 
+Figure 24: Carrier Tape Dimension Drawing  ................................ ................................ .............................  53 
+Figure  25: Plastic Reel Dimension Drawing  ................................ ................................ ..............................  54 
+Figure 26: Plastic Reel Dimension Drawing  ................................ ................................ ..............................  54 
+Figure 27: Packaging Process  ................................ ................................ ................................ ...................  55 
+Figure 28: Recommended Reflow Soldering Thermal Profile  ................................ ................................ ... 57 
+Figure 29: Labelling Information  ................................ ................................ ................................ ................  59 
+ 
+================================================================================
+--- PAGE 11 ---
+================================================================================
+                                           
+                                          GNSS Module Series  
+ 
+ 
+LC29H _Series_ Hardware_Design                                                       10 / 63 
+ 
+ 
+ 
+1 Product  Desc ription  
+ 
+1.1. Overview  
+ 
+The Quectel LC29H series module includes six variants : LC29H  (AA), LC29H (BA) , LC29H (CA ),     
+LC29H (DA) , LC29H (EA) * and LC29H (BS) . 
+ 
+The LC29H  series module supports mul tiple global positioning constellations , such as  GPS, GLONASS , 
+Galileo, BDS and QZSS . Only the LC29H (AA) supports SBAS (including WAAS, EGNOS, MSAS and 
+GAGAN) . The entire LC29H series supports AGNSS.  
+ 
+Key features:  
+ 
+⚫ Dual-band  and multi-constellation GNSS module and  featur ing a high-performance , high reliability  
+positio ning engine , which facilitates  fast and precise  GNSS positioning capabilit y. 
+⚫ Serial communication  interface s: UART , I2C and SPI *. 
+⚫ LC29H (BA) and LC29H (CA)  variants include an integrated  6-axis IMU and support sophisticated 
+dead -reckoning algorithms , fusin g the IMU data with the GNSS data to provide continuous tracking 
+solution in GNSS impaired environments.  
+⚫ LC29H (BA) , LC29H ( DA) and LC29H (EA) * integrates  an RTK position engine in order to provide 
+cm-level positioning.  
+⚫ The LC29H (BS) module is used as a b ase station to generate RTK  differential  correction  data that 
+can be transmitted over radio  or over cellular connectivity to become a part of a NTRIP network.  
+⚫ Embedded flash memory provides  the capacity for storing not only user-specific configurations , but 
+also future firmware updates . 
+ 
+The LC29H  is an SMD module  type with a compact form factor of 12.2 mm ×  16.0 mm ×  2. 5 mm. It can be 
+embedded in your applications through the  24 LCC pins.  
+ 
+The module s are fully compliant with the EU RoHS Directive.  
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+================================================================================
+--- PAGE 12 ---
+================================================================================
+                                           
+                                          GNSS Module Series  
+ 
+ 
+LC29H _Series_ Hardware_Design                                                       11 / 63 
+ 
+ 
+ 
+ 
+ 
+1.1.1.  Special Mark s 
+Table 1: Special Mark s Where applicable, this document will use the words  modules when referring to common attribut es and 
+“LC29H (AA) ”, “LC29H (BA) ”, “LC29H (CA) ”, “LC29H (DA) ”, “LC29H (EA) *” or “LC29H (BS) ” when 
+referring to attributes associated with a particular subset of m odule . 
+Mark  Definition  
+* Unless otherwise specified, w hen an asterisk ( *) is used after a function, feature, interface, 
+pin name, or argument, it indicates that the function, feature, interfac e, pin, or argument is 
+under development and currently not supported ; and the  asterisk ( *) after a model indicates 
+that the sample of the model is currently unavailable.  
+ The symbol indicates that a function or technology is supported by the module(s).  NOT E 
+================================================================================
+--- PAGE 13 ---
+================================================================================
+                                           
+                                          GNSS Module Series  
+ 
+ 
+LC29H _Series _Hardware_Design                                                                                               12 / 63 
+ 
+ 
+1.2. Features  
+ 
+Table 2: Product Features  
+Features  LC29H (AA)  LC29H (BA)  LC29H (CA)  LC29H (DA)  LC29H (EA) * LC29H (BS)  
+Grade  Industrial        
+Automotive  - - - - - - 
+Category  Standard Precision GNSS   -  - -  
+High Precision G NSS -  -   - 
+DR -   - - - 
+RTK 1 -  -   - 
+Timing  - - - - - - 
+VCC  Voltage  3.1–3.6 V, Typ. 3.3 V        
+V_BCKP Voltage  2.2–3.6 V , Typ. 3.3 V        
+I/O Voltage  2 Typ. 2.8 V        
+Communication UART        
+ 
+1 For LC29H (AA), LC29H (CA) and LC29H  (BS), RTK function can be im plemented using  an external position engine  running on external host , while these module s will 
+provide the raw data only.  
+2 For D_SEL1, D_SEL2 and UA RT2, the voltage domain is 1.8 V . 
+================================================================================
+--- PAGE 14 ---
+================================================================================
+                                           
+                                          GNSS Module Series  
+ 
+ 
+LC29H _Series _Hardware_Design                                                                                               13 / 63 
+ 
+ 
+Features  LC29H (AA)  LC29H (BA)  LC29H (CA)  LC29H (DA)  LC29H (EA) * LC29H (BS)  
+Interfaces  SPI*       
+I2C       
+Integrat ed 
+Features  Additional LNA        
+Additional F ilter       
+RTC Crystal        
+TCXO Oscillator        
+6-axis IMU  -   - - - 
+Constellations  and 
+Frequency Band  GPS  L1 C/A        
+L5       
+L2C - - - - - - 
+GLONASS  L1       
+L2 - - - - - - 
+Galile o E1       
+E5a       
+E5b - - - - - - 
+BDS B1I       
+B2a       
+================================================================================
+--- PAGE 15 ---
+================================================================================
+                                           
+                                          GNSS Module Series  
+ 
+ 
+LC29H _Series _Hardware_Design                                                                                               14 / 63 
+ 
+ 
+Features  LC29H (AA)  LC29H (BA)  LC29H (CA)  LC29H (DA)  LC29H (EA) * LC29H (BS)  
+B2I - - - - - - 
+QZSS  L1 C/A        
+L5       
+L2C - - - - - - 
+NavIC L5 - - - - - - 
+SBAS  L1  - - - - - 
+L-band  L-band  - - - - - - 
+Temp erature Range  Operating temperature range: -40 ° C to +85 ° C  
+Storage temperature range: -40 ° C to +90 ° C  
+Physical Characteristics  Size: (12.2 ± 0.15) mm ×  (16.0 ± 0.15) mm ×  (2.5 ± 0.20) mm  
+Weight: Approx. 0.9 g  
+ 
+ 
+ 
+For more information about GNSS constellat ion configuration , see document s [1] and [2] protocol specification s. 
+ 
+ 
+ 
+ 
+ 
+ 
+ NOTE  
+================================================================================
+--- PAGE 16 ---
+================================================================================
+                                           
+                                          GNSS Module Series  
+ 
+ 
+LC29H _Series _Hardware_Design                                                                                               15 / 63 
+ 
+ 
+1.3. Perfo rmance  
+ 
+Table 3: Product  Performanc e 
+Parameter  Specification  LC29H (AA)  LC29H (BA)  LC29H (CA)  LC29H (DA)  LC29H (EA) * LC29H (BS)  
+Power Consumption 3 
+(GPS + GLONASS + 
+Galileo + BDS + QZSS) Acquisition  24 mA  30 mA  28 mA  25 mA  25 mA  24 mA 
+Tracking  24 mA  30 mA  28 mA  25 mA  25 mA  24 mA  
+Backup Mode  25 μA  25 μA  25 μA  20 μA 20 μA  25 μA  
+Sensitivity  
+(GPS + GLONASS + 
+Galileo + BDS + QZSS)  Acquisition  -147 dBm  -145 dBm  -145 dBm  -145 dBm  -145 dBm  -147 dBm  
+Reacquisition  -159 dBm  -157 dBm  -157 dBm  -157 dBm  -157 dBm  -159 dBm  
+Tracking  -165 dBm  -165 dBm  -165 dBm  -165 dBm  -165 dBm -165 dBm  
+TTFF (without AGNSS) 3  Full Cold Start  26 s 26 s 26 s 26 s 26 s - 
+Warm Start  16 s 16 s 16 s 16 s 16 s - 
+Hot Start  1 s 1 s 1 s 1 s 1 s - 
+TTFF (with EASY) 4 Full Cold St art 16 s - - - - - 
+Warm Start  2 s - - - - - 
+Hot Start  1 s - - - - - 
+ 
+3 Room temperature , all satellit es at -130 dBm.  
+4 Open -sky, active high -precision GNSS antenna ; less than 1 km baseline length is also required for LC29H (BA) , LC29H (DA) and LC29H (EA) *. 
+================================================================================
+--- PAGE 17 ---
+================================================================================
+                                           
+                                          GNSS Module Series  
+ 
+ 
+LC29H _Series _Hardware_Design                                                                                               16 / 63 
+ 
+ 
+Parameter  Specification  LC29H (AA)  LC29H (BA)  LC29H (CA)  LC29H (DA)  LC29H (EA) * LC29H (BS)  
+TTFF (with EPO) 4 Full Cold Start  5 s 5 s 5 s 5 s 5 s - 
+Warm Start  3 s 3 s 3 s 3 s 3 s - 
+Hot Start  1 s 1 s 1 s 1 s 1 s - 
+Horizon tal Position Accura cy Autonomous 5: 1 m  Autonomous 5: 1 m 
+RTK 6:  
+< 0.1 m + 1 ppm  Autonomous 5: 
+1 m Autonomous 5: 
+1 m 
+RTK 6:  
+1 cm  + 1 ppm  Autonomous 5: 
+1 m 
+RTK 6: 
+1 cm + 1 ppm  - 
+Convergence Time  - RTK 6: < 10 s  - RTK 6: < 10 s  RTK 6: < 10 s  - 
+Update Rate  PVT: 1 –10 Hz  
+GNSS Raw Data:  
+1 Hz PVT: 1 Hz/10 Hz  
+GNSS Raw Data:  
+1 Hz 
+IMU Raw Data:  
+100 Hz (Max.) * PVT: 1 Hz/10 Hz  
+GNSS Raw Data:  
+1 Hz 
+IMU Raw Data:  
+100 Hz (Max.) * PVT: 1 Hz (RTK)  
+GNSS Raw Data:  
+1 Hz PVT: 1 –10 Hz 
+(RTK)   
+GNSS Raw Data:  
+10 Hz  PVT: 1 Hz 
+GNSS Raw 
+Data: 1Hz  
+Velocity Accuracy 3  0.03 m/s 0.03 m/s 0.03 m/s 0.03 m/s 0.03 m/s - 
+Accuracy of 1PPS Signal 3 Typ. 2 0 ns 
+Dynamic Performance 3 Maximum Altitude 7: 10000  m 
+Maximum Velocity 7: 500 m/s 
+Maximum Acceleration: 4g 
+ 
+5 CEP, 50  %, 24 hours static, -130 dBm, more t han 6 SVs . 
+6 CEP, 50 %, with active high -precision antennas in an open -sky environment and with in 1 km from the base station.  
+7 ITAR limits.  
+================================================================================
+--- PAGE 18 ---
+================================================================================
+                                           
+                                          GNSS Module Series  
+ 
+ 
+LC29H _Series _Hardware_Design                                                       17 / 63 
+ 
+ 
+1.4. Block  Diagram  
+ 
+A block diagram of the module s is presented below. It includes a front -end section with an additional LNA , 
+DIP and notch circuit , a TCXO and an XTAL, a 6 -axis IMU (suppo rted only by LC29H (BA) and     
+LC29H (CA)), a GNSS IC with a PMU.  The diplexer integrates two band -pass filter s, which can improve  
+the out-of-band rejection.  
+GNSS
+Engine
+ROM
+PMUPeripheral 
+ControllerRF_INActive 
+Interference 
+Cancellation
+XTAL
+32.768 kHzVCCRESET_N
+1PPS
+V_BCKPANT_ONUART × 2
+RTCRF
+Front-End
+6-axis IMUI2C
+WHEELTICK
+FWDTCXO
+26 MHz
+RAM
+FlashDIP LNAL1
+L5
+VDD_RFProcessor
+WAKEUP
+VDD_EXTSPI*LTE B13 
+notch
+WI*
+ 
+Figure 1: Block Diagram  
+ 
+ 
+ 
+1. FWD , WHEELTICK and WI * are supported by LC29H (BA)  and LC29H (CA) . 
+2. SPI* is only used for communication . The pins of SPI are multiplexed with I2C and UART1 pins, and 
+thus cannot be used simultaneously with I2C and UART 1. 
+ 
+1.5. GNSS Con stellations  
+ 
+The module s are a dual -band GNSS receiver that can receive and track  concurrent ly multiple GNSS 
+constellations . Owing to its RF front -end architecture, it can concurrently track  the following GNSS 
+constellations: G PS, GLONASS, Galileo, BDS and QZSS plus SBAS satellites. If low power 
+consump tion is a key factor, then the module s can be configured for a subset of GNSS constellations.  
+ 
+QZSS is a regional navigation satellite system that transmits signals compatible wit h the GPS L1 C/A, 
+L1C, L2C and L5 signals for the Pacific region coveri ng Japan and Australia. The module s can detect NOTE  
+================================================================================
+--- PAGE 19 ---
+================================================================================
+                                           
+                                          GNSS Module Series  
+ 
+ 
+LC29H _Series _Hardware_Design                                                       18 / 63 
+ 
+ 
+and track QZSS L1 C/A and L5 signals concurrently with GPS signals, leading to better availability 
+especially under challenging conditions , e.g., in urban canyons.  
+ 
+Table 4: GNSS C onste llations  and Frequency Bands  
+ 
+1.6. Augmentation System  
+1.6.1.  SBAS  
+The LC29H (AA)  supports SBAS signal reception. By augmenting primary GNSS constellations with 
+additional satellite -broadcast messages, the sy stem improves the accuracy and reliability of GNSS 
+information by corre cting signal measurement errors and providing information about signal accuracy, 
+integrity, continuity and availability. SBAS transmits signals for ranging or distance measurement, thus  
+further improving availability. Supported SBAS systems: WAAS, EGNOS, M SAS and GAGAN.  
+ 
+1.7. AGNSS  
+ 
+The module s support  AGNSS feature that significantly reduces the module s’ TTFF, especially under 
+lower signal conditions. To implement the AGNSS feature, the mo dules should get the assistance data 
+including the current time  and rough  position . For more information, see document [3] AGNSS application 
+note. 
+ 
+ 
+ System  Signal s 
+GPS L1 C/A : 1575.42 MHz  
+L5: 1176.45 MHz  
+GLONASS  L1: 1602 MHz + K ×  562.5 kHz  
+K = ( -7 to +6, integer)   
+Galileo  E1: 1575.42 MHz  
+E5a: 1176.45  MHz 
+BDS B1I: 1561.098 MHz  
+B2a: 1176.45 MHz  
+QZSS L1 C/A : 1575.42 MHz  
+L5: 1176.45 MHz  
+================================================================================
+--- PAGE 20 ---
+================================================================================
+                                           
+                                          GNSS Module Series  
+ 
+ 
+LC29H _Series _Hardware_Design                                                       19 / 63 
+ 
+ 
+ 
+1.7.1.  EASY 
+The LC29H (AA)  and LC29H (BS) support the EASY technology  to improve TTFF by providing  ancillary 
+information, such as the ephemeri s and almanac.  
+ 
+The EASY technology works as an embedded software to accelerate TTFF by predicting satellite 
+navigation messages from the received ephemeris. After receiving the broad cast ephemeris for the first 
+time, the GNSS engine automatically calculat es and predicts the orbit information up to 3 subsequent 
+days, and saves the predicted information in the internal memory. The GNSS engine will use the 
+information for positioning if there is not enough information from satellites, resulting in improved 
+positioning and TTFF.  
+ 
+The EASY function of LC29H (AA) reduces TTFF to  2 s in warm start. In this case, the backup  domain 
+should still be valid. To obtain enough broadcast ephemeris inf ormation from GNSS satellites,  in 
+strong -signal environments  the GNSS mod ule should keep tracking the information for at least 5 minutes  
+after fixing the position . 
+ 
+The EASY function is enabled by default and it  can be disabled by $PAIR490 . For more inform ation about 
+the command, see documen t [1] protocol specification . 
+ 
+1.7.2.  EPO 
+The module s feature  a leading AGNSS technology called EPO, which assist s the receiver to reduce the 
+TTFF for up to 14 days.  For more info rmation about EPO, see document  [3] AGNSS application note . 
+ 
+1.8. Multi -Tone AIC  
+ 
+The module s feature  the function  called  multi -tone active interference c ancellation (multi -tone AIC), which  
+decrease s harmonic distort ion of RF signals  from Wi-Fi, Bluetooth, 2G, 3G,  4G and 5G networks . 
+ 
+Up to  12 AIC tones embedded in the module provide effective narrow -band interference and jamming 
+elimination. Thus , the GNSS signal could  be demodulated  from the jammed signal , which can  ensure  
+better  navigation quality.  
+ 
+The AIC function is enabled by default,  and it can be disabled with $PAIR074  S/W command . For more 
+information, see document [1] protocol specification . 
+ 
+ 
+ 
+ 
+ 
+================================================================================
+--- PAGE 21 ---
+================================================================================
+                                           
+                                          GNSS Module Series  
+ 
+ 
+LC29H _Series _Hardware_Design                                                       20 / 63 
+ 
+ 
+ 
+1.9. RTK 
+ 
+Cellular
+Rover BaseCloud server Correction
+GNSS Satellites 
+Module
+Correction
+ 
+Figure 2: RTK Operation  Process  
+ 
+1.9.1.  RTK Rover  
+The LC29H (BA) , LC29H (DA)  and LC29H (EA )* support RTK functionality as rover s. 
+ 
+Before implement ing the RTK navigation technique , the module needs to receive the RTK differential data 
+via its UART port. RTK differential data can be delivered eith er using a cellular module or other terrestrial 
+network technolog ies. When set to the  default configuration, the module  will attempt  to achieve the best 
+positioning accuracy based o n the receive d correct ion data. Once  the differential correction data is 
+validated to be used by the position engine , the module will enter differential mode or RTK float mode. 
+Once  the module internal position engine dec odes the carrier phase ambiguit ies, it will achieve  the RTK 
+fixed mode.  The expected accuracy at RTK fixed mod e is lower than  20 cm . 
+ 
+The convergence time refers to the interval as the module internal position engine switching from RTK 
+float mode to RTK fi xed mode. It typically takes less than 60 s to fix the carrier phase ambiguities.  For 
+more information, see  document  [4] DR&RTK application note . 
+ 
+ 
+ 
+ 
+================================================================================
+--- PAGE 22 ---
+================================================================================
+                                           
+                                          GNSS Module Series  
+ 
+ 
+LC29H _Series _Hardware_Design                                                       21 / 63 
+ 
+ 
+ 
+1.9.2.  RTK B ase Station  
+The LC29H (BS) module supports RTCM data out put as a base station.  
+ 
+The LC29H (BS) module supports static mode, and the receiver mode can be set as “ Fixed mode” 
+through corresponding command. For more information about the command, see document [2] protocol 
+specification . The LC29H (BS) module can be set to use a previously surveyed coordinate set of the base 
+station antenna position. Provid ed that  the surveyed position has been professionally captured during a 
+geodic survey, this method can be the best  option in terms of accuracy.  
+ 
+The LC29H (BS) module can also set as “Survey -in-mode ” by the corresponding com mand, which means 
+the module can self -survey its position (coordinates) without using pre -surveyed position data.  When this 
+survey -in mode is adop ted, the user provides the defined observation time  and 3D error threshold  for the 
+survey. The receiver will s elf-survey its position during this period  and accumulate the data less than the 
+3D error threshold , and then calculate its average position.  Once  the observation time has elapsed, the 
+module will start running in static mode and output the configured RTCM  reference station messages.  
+ 
+1.10.  Dead  Reckoning Function  
+ 
+The LC29H (BA)  and LC29H (CA)  support the Dead Reckoning technology . By combining satellite  
+navigation data with wheel speed, gyroscope  and accelerometer data , the module obtain s continuous and 
+high accuracy  positioning in weak signal environments such as tunnels  and urban canyons  when the 
+vehicle state (e.g., speed, forward direction or vertica l displacement) changes, or even when the satellite 
+signal is partially or completely blocked.  For more inform ation, see  document [4] DR&RTK application 
+note. 
+ 
+1.11.  Firm ware Upgrade  
+ 
+The module  is delivered  with preprogrammed firmware. Quectel may release firmware versions that 
+contain bug fixes or performance optimizatio ns. It is highly important to implement a firmware upgrade 
+mechanism in your system. A firmware upgrade is the process of transferring a binary fi le image to the 
+receiver and storing it in non -volatile flash. For more information,  see docume nt [5] firmware upgrade 
+guide . 
+ 
+================================================================================
+--- PAGE 23 ---
+================================================================================
+GNSS Module Series  
+LC29H_ Series _Hardware_Design 22 / 63 
+2 Pin Assignment
+The Quecte l LC29H  series  module is equipped with 24 LCC pins by which the module can be mounted on your PCB. 
+WAKEUP
+1PPS
+WHEELTICK
+D_SEL1
+D_SEL2
+VDD_ RFVDD_EXTVCCGND
+V_BCKP
+RXD1/SPI_MOSI *
+TXD1/SPI_MISO *
+I2C_SCL/SPI_CLK *
+I2C_SDA/SPI_ CS*6 LC29H
+(Top View)
+GND POWER RESERVED I/O SYSTEM ANTRESET_N
+GND
+RF_IN
+GNDRESERVED
+RXD2
+ANT_ ON
+GNDVCCGND
+V_BCKP
+RXD1/SPI_MOSI *
+TXD1/SPI_MISO *
+I2C_SCL/SPI_CLK *
+I2C_SDA/SPI_CS *
+WI*
+RXD2
+ANT_ ON
+GNDWAKEUP
+1PPS
+RESERVED
+D_SEL1
+D_SEL2
+VDD_ RFVDD_EXT
+RESET_N
+GND
+RF_IN
+GNDLC29 H (BA)
+LC29 H (AA)LC29H (CA)
+FWDWAKEUP
+1PPS
+WHEELTICK
+D_SEL1
+D_SEL2
+VDD_ RFVDD_EXT
+RESET_N
+GND
+RF_IN
+GNDVCCGND
+V_BCKP
+RXD1/SPI_MOSI *
+TXD1/SPI_MISO *
+I2C_SCL/SPI_CLK *
+I2C_SDA/SPI_ CS*
+WI*
+RXD2
+TXD2
+ANT_ ON
+GNDLC29 H (DA)LC29 H (EA)*
+RESERVEDWAKEUP
+1PPS
+RESERVED
+D_SEL1
+D_SEL2
+VDD_ RFVDD_EXT
+RESET_N
+GND
+RF_IN
+GNDVCCGND
+V_BCKP
+RXD1/SPI_MOSI *
+TXD1/SPI_MISO *
+I2C_SCL/SPI_CLK *
+I2C_SDA/SPI_ CS*
+RESERVED
+RXD2
+ANT_ ON
+GNDVCCGND
+V_BCKP
+RXD1/SPI_MOSI *
+TXD1/SPI_MISO *
+I2C_SCL/SPI_CLK *
+I2C_SDA/SPI_ CS*
+RESERVED
+RXD2
+ANT_ ON
+GNDRESERVEDWAKEUP
+1PPS
+RESERVED
+D_SEL1
+D_SEL2
+VDD_ RFVDD_EXT
+RESET_N
+GND
+RF_IN
+GNDTXD2 TXD2RESERVED FWD
+TXD2 TXD2LC29H (BS)
+WAKEUP
+1PPS
+D_SEL1
+D_SEL2
+VDD_ RFVDD_EXT
+RESET_N
+GND
+RF_IN
+GNDRESERVEDRESERVED VCCGND
+V_BCKP
+RXD1/SPI_MOSI *
+TXD1/SPI_MISO *
+I2C_SCL/SPI_CLK *
+I2C_SDA/SPI_ CS*
+RESERVED
+RXD2
+ANT_ ON
+GNDTXD21
+2
+43
+5
+7
+8
+9
+10
+11
+1224
+23
+21
+20
+19
+18
+16
+15
+14
+1322
+17
+Figure 3: Pin Assignment  
+================================================================================
+--- PAGE 24 ---
+================================================================================
+GNSS Module Series  
+LC29H_ Series _Hardware_Design 23 / 63 
+Table 5: I/O Parameter Definition  
+Table 6: Pin Description  
+Funct ion Name  No. I/O Description  Remarks  
+Power  VCC 23 PI Main power supply  Provides clea n and steady 
+voltage . 
+V_BCKP  22 PI Backup power supply for 
+backup  domain  V_BCKP must be connected to 
+power supply for startup, and it 
+should always be powered if hot 
+(warm) start is needed.  
+VDD_EXT  7 PO Provides 2.8 V for external 
+circuit  Maximum output current  is 
+100 mA . 
+I/O D_SEL1 5 DI 
+Selects UART1/SPI */I2C D_SEL1 and D_SEL2 can be 
+used for selecting the interface for 
+communication and download ing. 
+The I/O voltag e domain of 
+D_SEL1 and D_SEL2 is 1.8 V.  
+See Chapter 4.1.1.1  Interface 
+Selection (D_SEL1 & D_SEL2)  for 
+details.  
+UART1/I2C interface s are used 
+for standard NMEA message 
+output, RTCM message  input 
+8/output, binary data input/output, 
+PAIR/PQTM message  D_SEL2  6 DI 
+TXD1/SPI_MISO * 20 DO UART1 Transmits data/  
+SPI master  in, slave out  
+RXD1/SPI_MOSI * 21 DI UART1 Receives data/  
+SPI master  out, slave in  
+I2C_SDA/SPI_CS * 18 DIO I2C serial  data/  
+SPI chip -select  
+I2C_SCL/SPI_CLK * 19 DI I2C serial  clock/  
+SPI clock  
+8 Only supported by LC29H (BA), LC29H (DA) and LC29H (EA) *. Type  Description  
+AI Analog Input  
+DI Digital I nput 
+DO Digital Output  
+DIO Digital Input/Output  
+PI Power Input  
+PO Power Output  
+================================================================================
+--- PAGE 25 ---
+================================================================================
+GNSS Module Series  
+LC29H_ Series _Hardware_Design 24 / 63 
+Funct ion Name  No. I/O Description  Remarks  
+input/output and firmware 
+upgrade. 
+SPI* is used for standard NMEA 
+message output, RTCM message  
+input 8/output, binary data 
+input/output and  PAIR/PQTM 
+message input/output.  
+TXD2 15 DO UART2 Tr ansmits data  UART2 is used for  outputting 
+system debugging data.  
+Its I/O voltage domain is 1.8 V.  RXD2 16 DI UART2 Receives data  
+FWD  2 DI Forward/Backward status  
+signal input  The pins are reserved on 
+LC29H (AA) , LC29H (DA) , 
+LC29H (EA) * and LC2 9H (BS) . 
+If unused, leave the pin N/C (not 
+connected).  WHEELTICK  4 DI Odometer/Wheel -tick pulse 
+input  
+1PPS 3 DO One pulse per second  Synchr onized on  rising edge.  
+If unused, leave the pin N/C.  
+WI* 17 DO Warning Indicator  The pin is reserved on 
+LC29 H (AA), LC29 H (DA), 
+LC29H (EA) * and LC29H (BS). 
+VCC mus t be valid to ensure the 
+output o f interrup t signal. 
+ANT VDD_RF  9 PO Supplies power fo r external 
+RF components  VDD_RF = VCC . The output 
+current capacity depends on VCC . 
+Typically used to  supply pow er for 
+an external active  antenna.  
+If unused, leave the pin N/C.  
+ANT_ON  14 DO Active antenna power control  
+in power saving mode  The pin outputs  high-level signal 
+in the Continuous mode and 
+low-level signal in the Backup 
+mode.  
+If unused, leave the pin N/ C. 
+RF_IN  11 AI GNSS antenna interface  50 Ω  characteristic impedance . 
+System  RESET_N  8 DI Resets the module  Active low.  
+The pin belongs to the  backup  
+domain.  
+WAKEUP  1 DI Wakes up the module from 
+the Backup mode  Pull the pin high for at least 10 ms 
+to wake up the module from the 
+Backup mode.  
+================================================================================
+--- PAGE 26 ---
+================================================================================
+                                           
+                                          GNSS Module Series  
+ 
+ 
+LC29H_ Series _Hardware_Design                                                       25 / 63 
+ 
+ 
+ 
+Funct ion Name  No. I/O Description  Remarks  
+Keep the pin open or pulled low 
+before entering the Backup mode.  
+The pin belongs to the backup  
+domain.  
+If unused, leave the pin N/C.  
+GND GND 10, 
+12, 
+13, 
+24 - Ground  Ensure a good GND connection to 
+all module GND pins, preferably 
+with a large ground plan e. 
+RESERVED  RESERVED  2, 4, 
+17 - Reserved  For LC29H (BA) and LC29H (CA) , 
+these pins are FWD , WHEELTICK  
+and WI* respectively.  
+For other variants, t hese  pins are 
+RESERVED . They must be left 
+floating and cannot be connected 
+to power or GND . 
+ 
+ 
+1. The I/O voltage  domain of D_SEL1, D_SEL2 and UART2 interface s is 1.8 V.  
+2. Leave RESERVED and unused pins N/C.  
+ NOTE  
+================================================================================
+--- PAGE 27 ---
+================================================================================
+                                           
+                                          GNSS Module Series  
+ 
+ 
+LC29H_ Series _Hardware_Design                                                       26 / 63 
+ 
+ 
+ 
+3 Power Man agement  
+ 
+The module s feature  a power optimized architecture with built -in autonomous energy saving capabilities 
+to minimize power consumption at a ny given time.  The receiver can be used in two operating mode s: 
+Backup mode for optimum power consumption, and Continuous  mode for optimum  performance.  
+ 
+3.1. Power Unit  
+ 
+VCC is the supply voltage pin of the module s. It supplies the PMU which in turn supplies th e entire system. 
+The load current of the VCC pin varies according to VCC voltage level, processor load and sat ellite 
+acquisition. It is important to supply sufficient current and make sure the power supply is clean and stable.  
+ 
+The V_BCKP pin supplies the backup  domain  that includes RTC and low power RAM memory . To 
+achieve quick startup and improve TTFF, the backu p domain power supply should be valid during the 
+interval. If the VCC is not valid, the V_BCKP supplie s low power RAM memory  that contains all the  
+necessary GNSS data and some of the user configuration variables.  
+ 
+VDD_RF is  an output pin equal  in voltage t o the VCC input.  In the Continuous mode, VDD_RF supplie s 
+the external active antenna. Only if the VCC is cut off , VDD_RF is turned off.  
+ 
+The modul es’ internal power supply  is shown  below : 
+VDD_RFVCC
+LNA
+PMUBackup Unit
+CPU
+FlashV_BCKP
+TCXO
+ 
+Figure 4: Inte rnal Power Supply  
+================================================================================
+--- PAGE 28 ---
+================================================================================
+                                           
+                                          GNSS Module Series  
+ 
+ 
+LC29H_ Series _Hardware_Design                                                       27 / 63 
+ 
+ 
+ 
+3.2. Power Supply  
+ 
+Module power consumption may vary by several orders of magnitude, especially when a power saving 
+mode is enabled.  Therefore, it is important for the power supply to be able to sustain peak power for a 
+short time, ensuring th at the load current does not exceed the rated value.  
+ 
+3.2.1.  VCC 
+VCC is the supply voltage  pin that supplies  BB, RF and 6-axis IMU  (supported only by LC29H (BA)  and 
+LC29H (CA) ). When the module s start up or switches from  the Backup mode to  the Continuous mode , 
+VCC must charge the internal capacitors in the core domain.  In some cases, this can lead to a significant 
+current drain . 
+ 
+For low -power applicati ons using power  saving mode, the LDO at the power supply or module input 
+needs  to be able to  provide sufficient  current.  An LDO with a high PSRR should be chosen  for good 
+performance. In addition,  a TVS, a nd a combination of a  10 μF, a 100 nF and a 33 pF d ecoupl ing 
+capacitor network should be added near the VCC pin. The lowest value capacitor should be the closest 
+to module pins.  
+ 
+It is not  recomm ended  to use a switching DC -DC power supply.  
+PMUVCC
+10 µF100 nFModule
+TVS33 pFVCC
+ 
+Figure 5: VCC Input Reference Circuit  
+ 
+ 
+ 
+ 
+ 
+ It is recommended to control the VCC of the module s via MCU to save power, or restart the module s if 
+the module s enter  an abnormal state.  NOTE  
+================================================================================
+--- PAGE 29 ---
+================================================================================
+                                           
+                                          GNSS Module Series  
+ 
+ 
+LC29H_ Series _Hardware_Design                                                       28 / 63 
+ 
+ 
+ 
+3.2.2.  V_BCKP  
+The V_BCKP pin supplies power for the backup  domain . Use of valid time and G NSS orbit data at 
+startup allows GNSS hot (warm) start. V_BCKP must be connected to power supply for startup, and it 
+should always be powered if hot (warm) start is needed . If there is a constant power supply in your 
+system, it can  be used to provide a sui table voltage to power V_BCKP.  
+ 
+V_BCKP can be directly powered by an  external  rechargeable  battery . It is recommended to place a 
+battery with  a TVS and  a combination of a 4.7 μF, a 100 nF and a 33 pF capacitor near the V_BCKP pin. 
+The figure below illustrates the reference design for powering the backup domain with a rechargeable 
+battery.  
+3.3 V Always on 
+Power
+Backup 
+Domain1K
+V_BCKP
+Rechargeable
+Backup Battery
+4.7 μF100 nFModule
+33 pFTVS
+ 
+Figure 6: Reference Charging Circuit  with Rechargeable Backup Batter y 
+ 
+V_BCKP can also be po wered by a 3.7 V lithium battery, as shown in the figure below.  It is 
+recommended to use MCU to con trol the enable pin of LDO. It is recommended to place a TVS and a 
+combination of a 4.7 μF, a 100 nF and a 33 pF capacitor near the V_BCKP pin.  
+Backup 
+DomainV_BCKP
+4.7 μF100 nFModule
+33 pFLDO3.3 V3.7 V Lithium
+Battery
+TVS
+MCUEN
+ 
+Figure 7: Reference  Charging Circuit with  3.7 V Lithium  Batter y 
+ 
+ 
+ 
+================================================================================
+--- PAGE 30 ---
+================================================================================
+                                           
+                                          GNSS Module Series  
+ 
+ 
+LC29H_ Series _Hardware_Design                                                       29 / 63 
+ 
+ 
+ 
+ 
+ 
+1. If V_BCKP is below the minimum value of the recommended operating voltage , the module s cannot 
+work normally.  
+2. In the Continuous mode, V_BCKP has a maximum current consumption of 100  μA, which will 
+deplete the battery. Therefore , it is not recommended to use a non -rechargeable battery.  
+3. A suitable resistor should be chosen according to the charging current value of the  rechargeable  
+battery.  And it is recommended  to use a 1 kΩ resistor . 
+4. It is recommended to control the V_BCKP of the module s via MCU to restart the module s if the 
+module s enter  an abnormal state.  
+ 
+3.3. Power Mode s 
+3.3.1.  Feature Com parison  
+The module s feature  supported in different modes are listed in the table below.  
+ 
+Table 7: Feature Comparison in Different Power Modes  
+ 
+3.3.2.  Continuous Mode  
+If V_BCKP and VCC  are powered on, the module s automatically enters the Continuous mod e that 
+comprises acquisition mode and tracking mode. In acquisition mode, the module s start to search 
+satellites, and to determine visible satellites, coarse frequency, as well as the code p hase of satellite 
+signals. Once  the acquisition is completed, the module s automatically switches to tracking mode. In 
+tracking mode, the module s track  satellites and demodulates the navigation data from specific satellites.  
+ Features  Continuous  Backup  
+NMEA /RTCM  from UART   - 
+1PPS   - 
+RF  - 
+Acquisition & Track ing  - 
+Power Consumption  High Low 
+Position ing Accura cy High - NOTE  
+================================================================================
+--- PAGE 31 ---
+================================================================================
+                                           
+                                          GNSS Module Series  
+ 
+ 
+LC29H_ Series _Hardware_Design                                                       30 / 63 
+ 
+ 
+ 
+3.3.3.  Backup Mode  
+For power -sensitiv e applications, the module receiver supports  a Backup mode to reduce power 
+consumption.  Only backup  domain is active in  the Backup mode and it keeps track of time.  
+ 
+⚫ Enter the Backup mode:  
+1. Send  $PAIR650  to shut down internal main power  supply  in sequence.  
+2. Cut off the power supply to the VCC pin and keep the V_BCKP pin powered.  
+ 
+⚫ Exit the Backup mode:  
+1. Restore VCC . 
+2. Pull the WAKEUP pin high for at least 10 ms . 
+ 
+For more information about the relevant software command,  see document [1] protocol specification . 
+WAKEUP
+UART ValidVCCV_BCKPEnter Backup mode
+Send commandValid Invalid
+Restore VCCExit Backup mode
+Backup mode Continuous mode Continuous mode  10 msLow power 
+consumption
+Cut off VCC
+Pull WAKEUP  highbelow 100 mV   1 s
+ 
+Figure 8: Enter/Exit Backup Mode Sequence  
+ 
+ 
+ 
+1. $PAIR650  must be sent ; to ensure hot (warm) start of the module s at the next startup , V_BCKP 
+must be kept power ed. 
+2. After VCC  is restor ed, the WAKEUP pin must be pulled up for at least 10 ms  for the module s to exit 
+the Backup mode. Otherwise, the UART will not output  data.  
+3. Ensure  a stable V_BCKP, without  rush and drop when VCC is switch ed on or off. 
+4. If you c ut off m odule ’s power supply  directly (without sending  $PAIR650 ), the module s cannot enter 
+the Backup mode normally.  In this case, the module s will be in  an undefi ned state and the power 
+consumption is going to be higher.  
+ 
+ NOTE  
+ 
+================================================================================
+--- PAGE 32 ---
+================================================================================
+                                           
+                                          GNSS Module Series  
+ 
+ 
+LC29H_ Series _Hardware_Design                                                       31 / 63 
+ 
+ 
+ 
+3.4. Power -up Sequence  
+ 
+Once  the VCC  and V_BCKP are powered up, the module s start up automatically and the voltage sh ould 
+rise rapidly in less than 50 ms.  
+ 
+To ensure the correct power -up sequence, th e backup  unit should start up no later than  the PMU. 
+Therefore, the V_BCKP must be powered simultane ously with  the VCC  or before  it. 
+ 
+Ensure  that the VCC has no rush or drop during  rising  time,  and then keep  it stable . The recommend ed 
+ripple is < 50 mV. 
+UART Valid InvalidVCCV_BCKP
+< 50 ms≥  0 s
+ 
+Figure 9: Power -up Sequence  
+ 
+3.5. Power -down Sequence  
+ 
+Once the VCC is shut down,  voltage  should  drop quickly  in less than 50 ms.  
+ 
+To avoid abn ormal voltage condition s, if VCC falls below  the minimum specifie d value, the system must 
+initiate a power -on re start by lowering VCC to less than 100 mV for at leas t 1 s. 
+================================================================================
+--- PAGE 33 ---
+================================================================================
+                                           
+                                          GNSS Module Series  
+ 
+ 
+LC29H_ Series _Hardware_Design                                                       32 / 63 
+ 
+ 
+ 
+UARTValid validVCC
+ below 100 mV ≥ 1 s
+InvalidV_BCKP
+< 50 ms≥ 0 s
+< 50 ms≥ 0 s
+ below 100 mV ≥ 1 s 
+Figure 10: Power -down and Power -on Restart Sequence  
+================================================================================
+--- PAGE 34 ---
+================================================================================
+                                           
+                                          GNSS Module Series  
+ 
+ 
+LC29H_ Series _Hardware_Design                                                       33 / 63 
+ 
+ 
+ 
+4 Application Interfaces  
+ 
+4.1. I/O Pins  
+4.1.1.  Communicat ion Interfaces  
+The following interface s can be used for data  reception and transmission.  
+ 
+4.1.1.1.  Interface Selection (D_SEL1 & D_SEL2)  
+By default , D_SEL1 and D_SEL2 are pulled down internally  to GND with a 75 kΩ resistor s. Pull one or 
+both of them up externally to high logical level to switch the interface for communication and 
+download ing. See document  [6] reference design  for the reference circuit of interface select ion. 
+ 
+Table 8: Interface Sele ction by D_SEL1 & D_SEL2  
+Interface Selection  UART1 SPI* I2C 
+D_SEL1 = 0 & D_SEL2 = 0  
+(Default)  Can be used for 
+communication and 
+download ing - Can only be used for 
+communication  
+D_SEL1 = 0 & D_SEL2 = 1  - - - 
+D_SEL1 = 1  & D_SEL2 = 0  - Can be used for 
+comm unication  - 
+D_SEL1  = 1 & D_SEL2 = 1  Can only be used for 
+communication  - Can be used for 
+communication and 
+download ing 
+ 
+ 
+D_SEL1 and D-SEL2 can be used for switching  the interface for communication and  downloading. The 
+I/O voltage domain of D_SEL1 and D_ SEL2 is 1.8 V.  
+ NOTE  
+================================================================================
+--- PAGE 35 ---
+================================================================================
+                                           
+                                          GNSS Module Series  
+ 
+ 
+LC29H_ Series _Hardware_Design                                                       34 / 63 
+ 
+ 
+ 
+4.1.1.2.  UART1 Interface  
+The module s have one UART interface  with the following  features:  
+ 
+⚫ Support s standard NMEA message output, RTCM message input 9/output, binary data input /output, 
+PAIR /PQTM  command input /output, and firmware upgrad e. 
+⚫ Support ed baud rates: 9600, 14400, 19200, 38400, 57600, 115200 , 230400, 460800 , 921600 and 
+3000000  bps. 
+⚫ Hardware flow control and synchronous operation are not supported.  
+ 
+A reference design  is show n in the figu re below . For more information, see document  [6] reference 
+design . 
+MCU
+MCU_TXD
+MCU_RXDTXD1
+RXD1Module
+MCU voltage level: 3.3 VGND GND
+ 
+Figure 11: UART 1 Interface Reference Design  
+ 
+ 
+1. UART 1 interface default settings vary dep ending on software version. See the relevant  software 
+versions for details.  
+2. If the I /O voltage of MCU is not matched with module,  a level -shifting circuit  must be selected.  
+ 
+4.1.1.3.  UART2 I nterface  
+The module s have one UART2 interface with the following  features : 
+ 
+⚫ Support s system  debugging data output . 
+⚫ Support ed baud rates: 9600, 14400, 19200, 38400, 57600, 115200 , 230400, 460800 , 921600 and 
+3000000  bps. 
+⚫ Hardware flow control and synchronous operation are not supported.  
+ 
+9 Only supported by LC29H (BA), LC29H (DA) and LC29H (EA) *. NOTE  
+================================================================================
+--- PAGE 36 ---
+================================================================================
+                                           
+                                          GNSS Module Series  
+ 
+ 
+LC29H_ Series _Hardware_Design                                                       35 / 63 
+ 
+ 
+ 
+ 
+1. The default baud rate of the UART2 interf ace is 3000000 bps.  
+2. The I/O typical  voltage of UART2 in terface is 1.8  V. If the I /O voltage of MCU is not matched with 
+the module s, a level -shifting circuit must be selected.  
+ 
+4.1.1.4.  I2C Interface  
+The module s have one I2C interface  with the following  features:  
+ 
+⚫ Support s standard NMEA message output,  RTCM message inp ut 9/output,  binary data input/output 
+and PAIR/PQTM message  input/output.  
+⚫ Operat es in slave  mode . 
+⚫ Support s 7-bit address . 
+⚫ Support s the standard mode (10 0 kbps) and fast mode (400 kbps). 
+ 
+A reference design  is show n in the figure below . For more information, see document  [6] reference 
+design . 
+SDA
+SCL
+GNDI2C_SDA
+I2C_SCL
+                   GNDModule MCU2.8 V
+R2
+2.2KR1
+2.2K
+ 
+Figure  12: I2C In terface Reference Design  
+ 
+ 
+If the I/O voltage of MCU is  not matched with that of the module s, a level -shifting circuit must be 
+selected . 
+ 
+ 
+ 
+ NOTE  NOTE  
+================================================================================
+--- PAGE 37 ---
+================================================================================
+                                           
+                                          GNSS Module Series  
+ 
+ 
+LC29H_ Series _Hardware_Design                                                       36 / 63 
+ 
+ 
+ 
+4.1.1.5.  SPI* 
+The module s have one SPI with the follow ing features : 
+ 
+⚫ Supports standard NMEA message output,  RTCM message input 9/output,  binary data input/output, 
+PAIR/PQTM message  input/output.  
+⚫ Operates in  slave mode.  
+⚫ Supports  full duplex  SPI (four -wire).  
+⚫ Maximum clock frequency : 48 MHz. 
+ 
+A reference design is shown in the fig ure below. For more information, see document  [6] reference 
+design . 
+SPI_CLK
+SPI_MOSI
+SPI_MISOSPI_CLK
+SPI_MOSI
+SPI_MISOModule
+(SPI Slave)MCU
+(SPI Master)
+SPI_CS SPI_CS
+GND GND
+ 
+Figure  13: SPI Reference Design  
+ 
+ 
+1. The pins of the  SPI are multiplexe d with I2C and UART 1 pins, and thus cannot be used with I2C or 
+UART 1 at the sa me time .  
+2. If the I /O voltage of MCU is not matched with the module s, a level -shifting circuit must be selected.  
+ 
+4.1.2.  FWD  
+The FWD pin (only supported by LC29H (BA) and LC29H (CA)) can be  used to input th e status signals 
+indicating the vehicle’s forward/backwar d movement.  When  the vehicle is moving forward,  it is at a low 
+voltage level ; when  the vehicle is moving backward,  it is at  a high level.  
+ 
+ 
+ 
+ 
+ 
+ NOTE  
+================================================================================
+--- PAGE 38 ---
+================================================================================
+                                           
+                                          GNSS Module Series  
+ 
+ 
+LC29H_ Series _Hardware_Design                                                       37 / 63 
+ 
+ 
+ 
+ 
+ 
+Only 4-wheel vehicles  need to be connected to the FW D pin, it is not required for 2 -wheelers.   
+ 
+4.1.3.  WHEELTICK  
+The WHEELTICK pin  (only supported by LC29H (BA) and LC29H (CA)) can be used to input wheel tick 
+pulse  signals from a vehicle , which are obtained from the wheel revolution sensors or vehicle 
+transmissio n. For more information about the reference circuit diagr am, see document  [6] reference 
+design . 
+ 
+4.1.4.  1PPS 
+The 1PPS can be used for time pulse signals, it generates a one pulse per second periodic signal,  
+synchronized  to GNSS time grid with intervals. Pulse accuracy is bett er than 20 ns. Maintaining high  
+accuracy of 1PPS requires visible satellites in an open sky environment and keeping the VCC powered.  
+ 
+4.1.5.  WI* 
+WI (only supported by LC29H (BA) and LC29H (CA)) signal is a n interrupt output to wake up the host . 
+The pin is pulled up internally to 2.8 V and outputs  low level  when the value of the 6 -axis IMU is higher 
+than the threshold value. The module cannot determine what causes the vehicle tilting. It needs the MCU 
+to judge whether the vehicle is towed or is running normally on an uphill road.  
+ 
+4.2. System  Pins  
+4.2.1.  WAKEUP  
+Pull the WAKUP  pin high for at least 10 ms to wake up  the module s from the Backup mode . Keep this pin 
+open or pulled low before entering the Backup mode.  The WAK EUP pin is pulled down internally  and it 
+belongs to backup  domain.  If unused, leave the pin N/C.  
+ 
+4.2.2.  RESET_N  
+RESET_N is an input pin. The module s can be reset by  driving the RESET_N pin low for at least 10 0 ms 
+and then  releasing  it. 
+ 
+An OC driver circuit as shown below is recommended  to control the RESET _N pin . 
+ 
+ NOTE  
+================================================================================
+--- PAGE 39 ---
+================================================================================
+                                           
+                                          GNSS Module Series  
+ 
+ 
+LC29H_ Series _Hardware_Design                                                       38 / 63 
+ 
+ 
+ 
+4.7K
+47KRESET_N
+Input pulse 
+Figure 14: Reference  OC Circuit for Module Reset  
+ 
+The following figure shows the reset sequence  of the module s. 
+Pull down
+  100 ms
+RESET_N
+UART Valid Valid InvalidVCCV_BCKP
+ 
+Figur e 15: Reset Sequence  
+ 
+ 
+RESET_N must be connected so that it can be used to reset the module s if the module s enter  an 
+abnormal state . 
+ NOT E 
+================================================================================
+--- PAGE 40 ---
+================================================================================
+                                           
+                                          GNSS Module Series  
+ 
+ 
+LC29H_ Series _Hardware_Design                                                       39 / 63 
+ 
+ 
+ 
+5 Design  
+ 
+This chapter explains the r eference design of the RF section and recommended footprint  of the module s. 
+ 
+5.1. Antenna Selection  
+5.1.1.  Antenna Specification s 
+The module s can be connected to a dedicated passive or active  dual-band (L1 + L5) GNSS  antenna to 
+receive G NSS satellite signals. The recommended antenna specification s are given in the table  below . 
+ 
+Table 9: Recommended Antenna Spec ification s 
+ 
+ 
+ 
+ 
+ 
+ 
+10 When RTK function is used to achieve high precision positioning, the antenna should meet  the specifications 
+recommended above.  Antenna Type  Specifications  
+Passive Antenna  Frequency Range: 1164 –1189 MHz & 1559 –1606 MHz 
+Polarization: RHCP  
+VSWR: < 2 (Typ.)  
+Passive Antenna Gain: > 0 dBi  
+Active Antenna  Frequency R ange: 1164 –1189 MHz & 1559 –1606 MHz 
+Polarization: RHCP  
+VSWR:  < 2 (Typ.)  
+Passive Antenna Gain: > 0 dBi  
+Active Antenna Noise Figure: < 1.5 dB  
+Active Antenna Total Gain: < 17 dB 
+Phase Center Offset: < 20 mm 10 
+Phase Center Variation: < 20 mm 10 
+Axial Ratio: < 3 dB 10 
+-3 dB Beam width: > 90° 10 
+================================================================================
+--- PAGE 41 ---
+================================================================================
+                                           
+                                          GNSS Module Series  
+ 
+ 
+LC29H_ Series _Hardware_Design                                                       40 / 63 
+ 
+ 
+ 
+ 
+1. For recommended antenna selection and design, see document  [7] GNSS antenna selection 
+guidance  or contact Quectel Technical Suppor t. 
+2. The total antenna gain equals  the internal LNA gain minus the total insertion loss of cables and 
+components inside the antenna.  
+ 
+5.1.2.  Antenna Selection Gu ide 
+Both active and passive dual -band (L1 + L5) GNSS antenna s can be used  for the module s. A passive 
+antenna is recommended if the antenna can be placed close to the module s, for instance, when the 
+distance between the module s and the antenna is less than 1 m. It is recommended to switch from  a 
+passive antenna to a n active antenna once the loss is > 1 dB, since the insertion loss of RF cable can 
+decrease  the C/N0 of GNSS signal.  For more information, see documen t [8] RF layout application note. 
+ 
+C/N0 is an important factor  for GNSS receivers, and it is defined as the ratio of the received modulated 
+carrier signal power to the received noise power in one Hz bandwidth. C/N0 formula : 
+ 
+ 
+The “Power of GNSS signal” is GNSS signal level . In practical environment, the signal level at the Earth’s 
+surface is about -130 dBm. “Thermal Noise” is -174 dB m/Hz at 290  K. To improve C/N0 of GNSS signal , 
+an LNA could be added to reduce “System NF”.  
+“System NF”, formula:  
+ 
+ 
+“F” is the noise factor of receiver system:  
+ 
+ 
+“F1” is the  first stage noise factor, “G1” is the first stage gain, etc. This formula indicates that LNA with 
+enough gain can compensate for the noise factor behind the LNA. In this case, “System NF” depends  
+mainly on the noise figure of components and trace s before first stage LNA plus noise figure of the LNA 
+itself. This explains the need for using an active antenna, if the antenna connection cable is too long.  
+ 
+ 
+ NOTE  
+================================================================================
+--- PAGE 42 ---
+================================================================================
+                                           
+                                          GNSS Module Series  
+ 
+ 
+LC29H_ Series _Hardware_Design                                                       41 / 63 
+ 
+ 
+ 
+5.2. Antenna Reference Design  
+ 
+In a complex elec tromagnetic environment, it is recommended to add a band -pass filter circuit to the 
+antenna design to further reduce the impact of out -of-band signals on the GNSS module , which has 
+stable su ppression effect on all out -of-band signals . The recommended SAW in the band -pass filter is 
+B39162B2651P810 from RF360. In the  actual layout, the circuit should be placed close to RF_IN pin.  
+Band-pass filter circuit can be selected according to the use case . 
+ 
+5.2.1.  Active Antenna Reference Design  
+When using VDD_RF pin to supply the active antenna, it is important to pay attention to op erating 
+voltage rang e of the antenna and the voltage drop on the power supply circuit. The voltage drop is 
+caused by the resistor (R2) and the inductor (L1) in the external power supply circuit. When selecting the 
+active antenna, it is recommended to choos e one of which  the S AW filter is placed in front of the LNA in 
+the internal framework. That can be used to further reduce the impact of out -of-band signals on the 
+GNSS module when there is a complex electromagnetic environment around the module s. The minim um 
+operating voltage  of selected active antenna needs to meet the circuit design characteristics.  
+Active Antenna
+L1  68 nH
+C2 NM
+C3 NMR1π Matching Circuit
+0RC1 100 pFC4 100 pF
+C5 100 nFTVSD1
+R3 
+10K
+Q2
+NPN 
+TriodePMOS
+Q1R4 NM_0R
+R2 10RBand -pass FilterModule
+RF_IN
+VDD_RF
+ANT_ONSAWLNAOptional
+Optional
+ 
+Figure 16: Active Antenna Reference Design  
+ 
+C1 is a DC -blocking capacitor used for block ing the DC current from VDD_RF. The C2, R1 and C3 
+components are reserved  for matching  antenna  impedance. By default, C1 is 100 pF ; R1 is 0  Ω, and C2 
+and C3 are not mounted. D1 is a n electro static discharge (ESD) protection device to protect the RF  
+signal input  from the potential damage caused by ESD.  The junction capacitance of D1 cannot be more 
+than 0.6 pF and a transient voltage suppressor is recommended.  
+ 
+An active antenna can be power ed by the VDD_RF pin. In that case, t he inductor L1 is used for 
+prevent ing the RF si gnal from leaking into V DD_RF and prevent ing noise propagation from the VDD_RF 
+to the antenna. The L1 inductor route s the bia s voltage  to the active antenna  without losses . Place  L1, 
+C4 and C5 components  close to the antenna interface  and route the proxima l end of L1 pad on the RF 
+================================================================================
+--- PAGE 43 ---
+================================================================================
+                                           
+                                          GNSS Module Series  
+ 
+ 
+LC29H_ Series _Hardware_Design                                                       42 / 63 
+ 
+ 
+ 
+trace . The recommended value of L1 should be at least 68 nH. The R2 resistor is used to  protect the  
+module s in case the active antenna is short -circuited to the ground  plane.  
+ 
+The antenna is always powered when R4 is mounted. When  it is not mounted, while Q1, Q2 and R3 are 
+mounted, the antenna power supply can be controlled through the ANT_ON pin. When the pin outputs 
+high level, the antenna is powered; otherwise, the antenna is not powered.  
+ 
+5.2.2.  Passive Antenna Reference Design  
+The following  figure is a typical reference design of a passive antenna.  
+Passive Antenna
+C1 NM
+C2 NMR1π Matching Circuit
+0RD1
+TVSRF_INModule
+Band -pass FilterOptional
+ 
+Figure 17: Passive Antenna Reference Design  
+ 
+The C1, R1 and C2 components are reserved for matching antenna impedance. By default, R1 i s 0 Ω, 
+while C1 and C2 are not mounted. D1 is an electrostatic discharge (ESD) protection device to protect RF 
+route from the  damage caused by ESD. The junction capacitance of D1 cannot be more than 0.6 pF and 
+a transient voltage suppressor is recommended.  The impedance of RF trace should be controlled to   
+50 Ω and trace length should be kept as short as possible.  
+ 
+5.3. Coexistence with Cellular Systems  
+ 
+Since GNSS signals are usually very weak, a GNSS receiver could be vulnerable to environmental 
+interference.  According to 3GPP specifications, a cellular terminal should transmit a signal of up to     
+33 dBm at GSM bands, or of about  24 dBm at WCDMA and LTE bands  or 26 dB m at 5G bands . 
+Therefore, coexistence with cellular systems must be optimized to avoid signi ficant deterioration of the 
+GNSS performance.  
+ 
+================================================================================
+--- PAGE 44 ---
+================================================================================
+                                           
+                                          GNSS Module Series  
+ 
+ 
+LC29H_ Series _Hardware_Design                                                       43 / 63 
+ 
+ 
+ 
+In a complex communication environment, interference signals can come from in -band and out -of-band 
+signals. Therefore, interference can be divided into two types: in -band interference and out -of-band 
+interfere nce, which are both described in this chapter.  
+ 
+In this chapter, you can also find suggestions for decreasing the impact of i nterference signals that will 
+ensure the interference immunity of a GNSS receiver.  
+ 
+5.3.1.  In-band Interference  
+In-band interference refer s to the signal whose frequency is within or near the operating frequency range 
+of a GNSS signal.  
+ 
+See the following figure f or more details.  
+Power [dBm ]
+0
+-110
+1525 1550 1575 1600 1625Frequency [MHz]GPS carrier frequency
+1575 .42 MHzInterference 
+signalGPS operation 
+bands
+ 
+Figure 18: In-band Interference on GPS L1  
+ 
+The most common in -band interferences usuall y come from:  
+ 
+⚫ Harmonics , caused by crystals, high -speed signal lines, MCUs, switch -mode power supply etc., or 
+⚫ Intermodulation  from different communication systems.  
+ 
+Common frequency combinations are presented in the table below. The table lists some probab le 
+in-band interferences generated by two kinds of out -of-band signal intermodulation, or the second 
+harmonic of LTE B and 13. 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+================================================================================
+--- PAGE 45 ---
+================================================================================
+                                           
+                                          GNSS Module Series  
+ 
+ 
+LC29H_ Series _Hardware_Design                                                       44 / 63 
+ 
+ 
+ 
+Table 10: Intermodulation Distortion (IMD) Products  
+Source F1  Source F2  IM Calculation  IMD Product s 
+GSM850/B and 5 Wi-Fi 2.4 GH z F2 (2412 MHz) - F1 (837 MHz)  IMD2 = 1575 MH z 
+Band 1  n78 F2 (3500 MHz) - F1 (1925 MHz)  IMD2 = 1575 MHz 
+DCS1800/B and 3 PCS1900/B and 2 2 ×  F1 (1712.6 MHz) - F2 (1850.2 MH z) IMD3 = 1575 MH z 
+PCS1900/B and 2 Wi-Fi 5 GHz  F2 (5280 MHz) - 2 ×  F1 (1852 MHz)  IMD3 = 1576 MH z 
+LTE B and 13 - 2 ×  F1 (786.9 MH z) IMD2 = 1573.8 MHz  
+ 
+5.3.2.  Out-of-band Interferenc e 
+Strong signals transmitted by other communication systems can cause a GNSS receiver saturation, thus 
+greatly deteriorating its performan ce, as illustrated in the following figure. In practical applications, 
+common strong interference signals originate fr om wireless communication modules, such as GSM, 3G, 
+LTE, 5G, Wi -Fi and Bluetooth.  
+Power [dBm ]
+0
+-110
+0 500 1000 2000 2500Frequency [MHz]GPS carrier frequency
+1575 .42 MHz
+GPS 带宽GSM 850 GSM 900 PCS1900 DCS 1800Wi-Fi 2.4 GHz
+ 
+Figure 19: Out -of-band Interf erence on GPS L1  
+ 
+5.3.3.  Ensuring Interference Immunity  
+There are several things you can do to decrease the impact of interfe rence signals and thus ensure the 
+interference immunity of a GNSS receiver:  
+ 
+⚫ Keep the GNSS antenna away from interference source s; 
+⚫ Add a b and-pass filter in front of the GNSS module ; 
+⚫ Use shielding and multi -layer PCB and ensure adequate grounding ; 
+⚫ Optimize  layout and component placement of the PCB and the whole device . 
+ 
+================================================================================
+--- PAGE 46 ---
+================================================================================
+                                           
+                                          GNSS Module Series  
+ 
+ 
+LC29H_ Series _Hardware_Design                                                       45 / 63 
+ 
+ 
+ 
+The following figure illustrates the interference source and the potenti al interference path. A complex 
+communication system  usually contains RF power amplifiers, MCUs, crystals, etc. These devices should 
+be far away from a GNSS receiver, or a GNSS module. In particular, shielding should be used to prevent 
+strong signal interf erence for power amplifiers. The cellular antenna should be placed away from a 
+GNSS receiving antenna to ensure enough  isolation. Usually, a good design should provide at least a   
+20 dB isolation between two antennas. Take DCS1800, for example, the maximum  transmitted power of 
+DCS1800 is around 30 dBm. After a 20 dB attenuation, the signal received by the GNSS antenna wil l be 
+around 10 dBm, which is still too high for a GNSS module. With a GNSS band -pass filter with around   
+40 dB rejection in front of the GNSS module, the out -of-band signal will be attenuated to -30 dBm.  
+CellularDCS 1800      
+30 dBmIsolation = 20 dB10 dBm
+GNSS 
+ReceiverRejection = 40 dB
+RF Power 
+AmplifierCrystal MCU-30 dBm
+Shielding
+ 
+Figure 20: Interference Source and Its Path  
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+================================================================================
+--- PAGE 47 ---
+================================================================================
+                                           
+                                          GNSS Module Series  
+ 
+ 
+LC29H_ Series _Hardware_Design                                                       46 / 63 
+ 
+ 
+ 
+5.4. Recommended Footprint  
+ 
+The figure below illustrates  module footprint. T hese are recommendations, not specifications.  
+ 
+Figure 21: Recommen ded Footprint  
+ 
+ 
+Maintain  at least 3 mm  keepout  between the module s and other components on the motherboard  to 
+improve soldering quality a nd maintenance convenience . NOTE  
+================================================================================
+--- PAGE 48 ---
+================================================================================
+                                           
+                                          GNSS Module Series  
+ 
+ 
+LC29H_ Series _Hardware_Design                                                       47 / 63 
+ 
+ 
+ 
+6 Electrical Specification  
+ 
+6.1. Absolute Maximum Ratings  
+ 
+Absolute maximum rating s for power su pply and voltage on digital pins of the  module  are listed in table  
+below . 
+ 
+Table 11: Absolute Maximum Ratings  
+ 
+ 
+Stressing the device beyond the “Absolute Maximum Ratings” may cause permanent damage. The 
+product is not protected against over -voltage or reversed voltage. Therefore, it is necessary to use 
+appropriate protection diodes to keep vo ltage spikes within the parameters given in the table above.  
+ 
+6.2. Recommended Operating Conditions  
+ 
+All specifications ar e at an ambie nt temperature of +25 ° C. Extreme operating temperatures can 
+significantly impact the specifi ed values. Applications operatin g near the temperature limit s should be 
+tested to ensure specification  validity . 
+ Para meter  Description  Min. Max.  Unit 
+VCC  Power Supply Voltage  -0.3 4.3 V 
+V_BCKP  Backup Supply Voltage  -0.3 4.3 V 
+VIN_IO Input Voltage at I/O Pins  VI/O = 2.8 V  -0.3 3.08 V 
+VI/O = 1.8 V  -0.3 1.98 V 
+PRF_IN Input Power at RF_IN  - 0 dBm 
+T_storag e Storage Te mperature  -40 90 °C 
+NOTE  
+================================================================================
+--- PAGE 49 ---
+================================================================================
+                                           
+                                          GNSS Module Series  
+ 
+ 
+LC29H_ Series _Hardware_Design                                                       48 / 63 
+ 
+ 
+ 
+Table 12: Recommended Operating Condition  
+Parameter  Description  Min. Typ. Max.  Unit 
+VCC  Power Supply Voltage  3.1 3.3 3.6 V 
+V_BCKP  Backup Supply Volt age 2.2 3.3 3.6 V 
+VDD_EXT  Power Output Voltage  - 2.8 - V 
+IO_D omain  Digital I /O Pin Voltage D omain  2.1 2.8 3.08 V 
+1.62 1.8 1.98 V 
+VIL Digital I/O Pin Low -Level Input Voltage  VI/O = 2.8 V  -0.3 0 0.7 V 
+VI/O = 1.8 V  -0.3 0 0.63 V 
+VIH Digital I/O Pin High-Level Input Voltage  VI/O = 2.8 V  1.75 - 3.08 V 
+VI/O = 1.8 V  1.17 - 2.1 V 
+VOL Digital I/O Pin Low -Level Output  Voltage  VI/O = 2.8 V  - - 0.35 V 
+VI/O = 1.8 V  - - 0.45 V 
+VOH Digital I/O Pin High -Level Output Voltage  VI/O = 2.8 V  2.1 - - V 
+VI/O = 1.8 V  1.35 - - V 
+RESET_N  Low-Level Input Voltage  -0.3 - 0.1 V 
+High-Level Input Voltage  1.8 3.3 3.6 V 
+WAKEUP  Low-Level Input Voltage  -0.3 0 0.7 V 
+High-Level Input Voltage   3.0 3.3 3.6 V 
+VDD_RF  VDD_RF Voltage  3.1 3.3 3.6 V 
+IVDD_RF  VDD_RF O utput Cur rent - - 100 mA 
+T_operating  Operati ng Temperature  -40 25 +85 °C 
+ 
+ 
+1. Operation beyond the “Operating Conditions ” is no t recommended and extended exposure beyond 
+the “Operating Conditions ” may affect device  reliability.  
+2. The 2.8 V digital I/O pins mentioned in the table above refer to all digital pins in Table 6: Pin NOTE  
+================================================================================
+--- PAGE 50 ---
+================================================================================
+                                           
+                                          GNSS Module Series  
+ 
+ 
+LC29H_ Series _Hardware_Design                                                       49 / 63 
+ 
+ 
+ 
+Description  except RESET_N, WAKEUP, TXD2, RXD2,  D_SEL1 and D_SEL2 pins. 
+3. The 1.8 V digital I/O pins mentioned in the table above r efer to TXD2, RXD2 , D_SEL1 and D_SEL2 
+pins in Table 6: Pin Description . 
+ 
+6.3. Supply Current Requirement  
+ 
+The following  table lists the supply current values of the total system that may be appl ied. Actual power 
+requirements may vary depending on processor load, external circuits, firmware version, the number o f 
+tracked satellites, signal strength, startup type, test time and conditions.  
+ 
+Table 13: Supply Current  for LC29H  (AA) , LC29H (BA) and LC29H (CA)  
+ 
+Table 14: Supply Current  for LC29H (DA ), LC29H (EA) * and LC29H (BS)  
+ 
+ 
+11 Room temperature, measurements are taken with typical voltage.  
+12 Used to determine maximum current capability of power supply . 
+13 Used to determine  required battery current  capability . Parameter  Description  Condition  LC29H (AA)  LC29H (BA)  LC29H (CA)  
+ITyp. 11 IPEAK 11 ITyp. 11 IPEAK 11 ITyp. 11 IPEAK 11 
+IVCC 12 Current at 
+VCC  Acquisition 24 mA 61 mA 30 mA 54 mA 28 mA 54 mA  
+Tracking  24 mA 65 mA 30 mA 54 mA  28 mA  54 mA  
+IV_BCKP 13 Current at 
+V_BCKP  Continuous mode  93 μA  134 μA  74 μA 113 μA  74 μA  113 μA  
+Backup mode  25 μA 61 μA 25 μA 60 μA 25 μA 60 μA  
+Parameter  Description  Condition  LC29H (DA)  LC29H (EA) * LC29H (BS)  
+ITyp. 11 IPEAK 11 ITyp. 11 IPEAK 11 ITyp. 11 IPEAK 11 
+IVCC 12 Current at 
+VCC  Acquisition 25 mA 68 mA 25 mA 68 mA 24 mA 38 mA 
+Tracking  25 mA 68 mA  25 mA 68 mA  24 mA 39 mA 
+IV_BCKP 13 Current at 
+V_BCKP  Continuous mode  74 μA  113 μA  74 μA  113 μA  75 μA 138 μA 
+Backup mode  25 μA 51 μA 25 μA 51 μA 25 μA 55 μA 
+================================================================================
+--- PAGE 51 ---
+================================================================================
+                                           
+                                          GNSS Module Series  
+ 
+ 
+LC29H_ Series _Hardware_Design                                                       50 / 63 
+ 
+ 
+ 
+6.4. ESD Protection  
+ 
+Static electricity occurs naturally and it may damage the module s. Therefore, applying proper ES D 
+countermeasures and handling methods is imperative. For example, wear anti -static gloves during the 
+development, production, assembly, a nd testing of the module s; add ESD protection components to the 
+ESD sensitive interfaces and points in the product des ign. 
+ 
+Measures to ensure protection against ESD damage when handling the module s: 
+ 
+⚫ When mounting the module s onto a motherboard, make sure  to connect the GND first , and then the 
+RF_IN pin. 
+⚫ When handling the RF_IN pin, do not come into contact with any char ged capacitors or materials that 
+may easily generate  or store charges (such as patch antenna, coax ial cable, and soldering iron).  
+⚫ When sol dering the RF_IN pin, make sure to use an ESD safe soldering iron (tip).  
+================================================================================
+--- PAGE 52 ---
+================================================================================
+                                           
+                                          GNSS Module Series  
+ 
+ 
+LC29H_ Series _Hardware_Design                                                       51 / 63 
+ 
+ 
+ 
+7 Mechanical Dimensions  
+ 
+This chapter describe s the mechanical dimensions of the  module s. All dimensions are in millimeter s (mm). 
+The dimensional  tolerances are ± 0. 20 mm, unless otherw ise specified.  
+ 
+7.1. Top, Side and Bottom View Dimensions  
+ 
+12 1324
+12 1324
+ 
+Figure 22: Top, Side and Bottom View Dimensions  
+ 
+ 
+The package warpage level of the  module s conforms to the JEITA ED -7306 standard.  
+ 
+ 
+ NOTE  
+================================================================================
+--- PAGE 53 ---
+================================================================================
+                                           
+                                          GNSS Module Series  
+ 
+ 
+LC29H_ Series _Hardware_Design                                                       52 / 63 
+ 
+ 
+ 
+7.2. Top and Bott om Views  
+ 
+1324 1
+1224
+131
+12
+ 
+Figure 23: Top and Bottom Module Views  
+ 
+ 
+The images a bove are for illustrative purposes only and may differ from the actual module . For authentic  
+appearance and label , see the module s receive d from Quectel . 
+ NOTE  
+================================================================================
+--- PAGE 54 ---
+================================================================================
+                                           
+                                          GNSS Module Series  
+ 
+ 
+LC29H_ Series _Hardware_Design                                                       53 / 63 
+ 
+ 
+ 
+8 Product Handling  
+ 
+8.1. Pack aging  
+ 
+This chapter describes only the key parameters and process of packaging . All figures below are for 
+reference only. The appearance and structure of packaging materials are subject to the actual delivery.  
+ 
+The module s are packed with carrier tape packaging and  the details are as follows.  
+ 
+8.1.1.  Carrie r Tape  
+Carrier tape dimensions  are detailed below : 
+ 
+ 
+Figure 24: Carrier Tape Dimension Drawing  
+ 
+Table 15: Carrier Tape Dimension Table (Unit: mm)  
+W P T A0 B0 K0 K1 F E 
+32 24 0.4 12.7 16.4 2.9 7.4 14.2 1.75 
+================================================================================
+--- PAGE 55 ---
+================================================================================
+                                           
+                                          GNSS Module Series  
+ 
+ 
+LC29H_ Series _Hardware_Design                                                       54 / 63 
+ 
+ 
+ 
+8.1.2.  Plastic Reel  
+ 
+Figure 25: Plastic Reel Dimension Drawing  
+ 
+Table 16: Plastic Reel Dimension Table (Unit: mm)  
+øD1 øD2 W 
+330 100 32.5 
+ 
+8.1.3.  Mounting Direction  
+ 
+Figure 26: Plastic Reel Dimension Drawing  
+================================================================================
+--- PAGE 56 ---
+================================================================================
+                                           
+                                          GNSS Module Series  
+ 
+ 
+LC29H_ Series _Hardware_Design                                                       55 / 63 
+ 
+ 
+ 
+8.1.4.  Packaging Process  
+Figure  27: Packaging Process  
+ 
+ 
+ Place the module onto the carrier tape and 
+use the cover tape to cover them; then wind 
+the heat -sealed carrier tape o n the plastic re el 
+and use the protective tape for protection.  1 
+plastic reel can load 250  modules.  
+Place the packed plastic reel, humidity 
+indicator  card a nd desiccant bag inside  a 
+vacuum bag, then vacuumize it . 
+ 
+  
+ Place the vacuum -packed plastic reel inside  a 
+pizza box.  
+Place 4 pizza boxes inside 1 carton and seal it. 
+One carton can pack 1000 mod ules.  
+ 
+ 
+Pizza box size (mm ): 363 × 343 × 55 
+Carton size (mm): 380 × 250 × 365 
+================================================================================
+--- PAGE 57 ---
+================================================================================
+                                           
+                                          GNSS Module Series  
+ 
+ 
+LC29H_ Series _Hardware_Design                                                       56 / 63 
+ 
+ 
+ 
+8.2. Storage  
+ 
+The module s are provided in the vacuum -sealed packaging.  MSL of the module s is rat ed as 3. The 
+storage requirements are listed  below.  
+ 
+1. Recommended  Storage Condition : the temperature should be 23  ± 5 ° C and the relative humidity 
+should be 35 –60 %.  
+ 
+2. Shelf  life (in  a vacuum -sealed packaging) : 12 months in the Recommended Storage Condition . 
+ 
+3. Floor life: 168 hours 14 in a factory  where the temperature is 23 ± 5 ° C and relative humidity is below 
+60%. After the vacuum -sealed packaging is removed, the module s must be processed in  reflow  
+soldering or other high -temperature operations within 168 hour s. Otherwise, the module should be 
+stored in an environment where the relative humidity is less than 10 % (e.g ., a dry cabinet).  
+ 
+ 
+4. The module s should be pre -baked to avoid blistering, cracks and inner -layer separation in PCB under 
+the following circumstanc es: 
+ 
+⚫ The module is not stored under R ecommended Storage  Condition;  
+⚫ Violation of the third requirement above;  
+⚫ Vacuum-sealed packaging is broken, or the packaging has been removed for over 24 hours;  
+⚫ Before module  repairing.  
+ 
+5. If pre-baking  is needed, it shoul d meet  the requirements below:  
+ 
+⚫ The module s should be baked for 8 hours at 120 ± 5 ° C;  
+⚫ The module s must be solder ed to  the PCB within 24 hours of baking, otherwise it should be put in 
+a dry environment such as a dry cabinet . 
+ 
+ 
+1. To avoid blistering, layer se paration and other soldering issues, extended exposure of the module s 
+to the air is forbidden.  
+2. Take the module s out of the packag ing and put it on high -temperature -resistan t fixtures before 
+baking. If shorter baking time is desired, see IPC/JEDEC J -STD-033 for the baking procedure.  
+3. Pay attention to ESD protection , such as wearing anti -static gloves,  when touching the module s. 
+ 
+ 
+14 This floor life is only appli cable when the environment conforms to IPC/JEDEC J -STD-033. It is recommended to start 
+the solder reflow process within 24 hours after the package is removed if the temperature and moisture do not conform to, 
+or are not sure to confirm to IPC/JEDEC J -STD-033. And d o not remove the packaging of the tremendous modules if they 
+are not ready for soldering . NOTE  
+================================================================================
+--- PAGE 58 ---
+================================================================================
+                                           
+                                          GNSS Module Series  
+ 
+ 
+LC29H_ Series _Hardware_Design                                                       57 / 63 
+ 
+ 
+ 
+8.3. Manufacturing and Soldering  
+ 
+Push the squeegee to apply solder paste on the surface of stencil, thus making the paste fill the sten cil 
+openings and then penetrate the PCB. Apply proper  force on the squeegee to produce a clean stencil 
+surface o n a single pass. For more information about the stencil  thickness of the module s, see document  
+[9] module SMT application note . 
+ 
+The recommended peak reflow temperature should be 235–246 ºC, with 246 ºC as the ab solute 
+maximum reflow temperature. To avoid module damage caused by repeated heating, it is recommended 
+to mount  the module s to the PCB only after reflow soldering the other side of  the PCB. The r ecommended 
+reflow soldering thermal profile  (lead-free reflo w soldering ) and related parameters are shown  in the 
+figure and table  below.  
+Temp. (°C)
+Reflow Zone
+Soak Zone246
+200217235C
+D B
+A 150
+100
+ 
+Ramp-to-soak slope: 
+0–3 °C/s
+ Cool-down slope: 
+        -3–0 °C/s
+ Ramp-up slope: 
+0–3 °C/s
+ 
+Figure 28: Recommended Reflow Soldering Thermal Profile  
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+================================================================================
+--- PAGE 59 ---
+================================================================================
+                                           
+                                          GNSS Module Series  
+ 
+ 
+LC29H_ Series _Hardware_Design                                                       58 / 63 
+ 
+ 
+ 
+Table 17: Recommended Thermal Pro file Parameters  
+ 
+ 
+1. The above profile  parameter requirements are for the measured temperature of the solder joi nts. 
+Both the hottest and coldest spots of solder joints on the PCB should meet the above requirements.  
+2. During m anufacturing and soldering, or any other processes that may  require direct  contact  with the 
+module s, NEVER  wipe the module s shielding can with o rganic solvents, such as acetone, ethyl 
+alcohol, isopropyl alcohol,  and trichloroethylene. Otherwise, the shield ing can may become rusty. 
+3. The module s shielding can  is made of cupronickel base material. The Neutral Salt Spray Test has 
+shown that after 12 ho urs the laser -engraved label information on the shielding can is still clearly 
+identifiable and the QR code is s till readable, although white rust may be found.  
+4. If a conformal coating is necessary for the module s, DO NOT  use any coating material that may 
+react with the PCB or shielding cover . Prevent the coating material from penetrating  the module s 
+shield.  
+5. Avoid us ing ultrasonic technology for module cleaning since it can damage crystals inside the 
+module s. 
+6. Due to SMT process complexity, contact Quectel Te chnical Support in advance regarding any 
+ambiguous situation, or any process (e.g. selective soldering, ultrason ic soldering) that is not 
+addressed in document  [9] module SMT application note . 
+ 
+ Factor  Recommended Value  
+Soak Zone   
+Ramp -to-soak slope  0–3 ° C/s  
+Soak time (between A and B: 150  ° C and 200 ° C) 70–120 s  
+Reflow Zone   
+Ramp -up slope  0–3 ° C/s  
+Reflow time (D: over 217° C) 40–70 s 
+Max temperature  235–246 ° C  
+Cool-down slo pe -3–0 ° C/s 
+Reflow Cycle   
+Max reflow cycle  1 
+NOTE  
+================================================================================
+--- PAGE 60 ---
+================================================================================
+                                           
+                                          GNSS Module Series  
+ 
+ 
+LC29H_ Series _Hardware_Design                                                       59 / 63 
+ 
+ 
+ 
+9 Labelling Inform ation  
+ 
+The label of the Quectel GNSS modules contains  important product information. The location of the 
+product  type number is shown in figure  below.  
+Quectel Logo
+Product Name
+Pin 1 IndicationOrdering Code
+ 
+Figure 29: Labelling Information  
+ 
+The image above i s for illustrative purposes only and may differ from the actual module . For authentic  
+appearance and label , see the module s received  from Quectel . 
+================================================================================
+--- PAGE 61 ---
+================================================================================
+                                           
+                                          GNSS Module Series  
+ 
+ 
+LC29H_ Series _Hardware_Design                                                       60 / 63 
+ 
+ 
+ 
+10 Appendix References  
+ 
+Table 18: Related Documents  
+ 
+Table 19: Terms and Abbreviations  
+Abbreviation  Description  
+3GPP  3rd Generation Partnership Project  
+1PPS 1 Pulse Per Second  
+AIC Active Interference Cancellation  
+AGNSS  Assisted GNSS (Global Navigation Satellite S ystem)  
+BDS BeiDou Navigation Satellite System  
+bps bit(s) per second  
+CEP Circular Error Probable  Document Name  
+[1]  Quectel_LC29H&LC79H _Series _GNSS_Protocol_Specification  
+[2]  Quectel_LC29H (BS)_GNSS_Protocol_Specification  
+[3]  Quectel_L89_R2.0&LC29H&LC79H_AGNSS_Application_Note  
+[4]  Quectel_LC29H(BA,CA,DA)_DR&RTK_Application_Note  
+[5]  Quectel_L 89_R2.0 &LC29H&LC79H _Series _Firmware_Upgrade_Gu ide 
+[6]  Quectel _LC29H _Series _Refer ence _Design  
+[7]  Quectel_GNSS_Antenna_Selection_Guidance  
+[8]  Quectel_RF_Layout_Application_Note  
+[9]  Quectel_Module_SMT_Ap plication_Note  
+================================================================================
+--- PAGE 62 ---
+================================================================================
+                                           
+                                          GNSS Module Series  
+ 
+ 
+LC29H_ Series _Hardware_Design                                                       61 / 63 
+ 
+ 
+ 
+Abbreviation  Description  
+C/N 0 Carrier -to-noise Ratio  
+DCS1800  Digital  Cellular System at 1800  MHz 
+DR Dead Reckoning  
+EASY  Embedded Assist System  
+EGNOS  European Geostationary Navig ation Overlay Service  
+EPO  Extended Prediction Orbit  
+ESD Electrostatic Discharge  
+GAGAN  GPS Aided Geo Augmented Navigation  
+Galileo  Galileo Sat ellite Navigation System (EU)  
+GLONASS  Global Navigation Satellite System (Russia)  
+GNSS  Global Navigation Satel lite System  
+GPS  Global Positioning System  
+GSM Global System for Mobile Communications  
+I/O Input/Output  
+I2C Inter-Integrated Circuit  
+IC Integrated Circuit  
+IMU Inertial Measurement Unit  
+IPEAK Peak Current  
+IRNSS /NavIC  India n Regional Navigation Satell ite System  
+kbps kilobits per second  
+LCC Leadless Chip Carrie r (package)  
+LDO Low-dropout Regulator  
+LNA Low-Noise Amplifier  
+LTE Long -Term Evo lution  
+MCU Microcontroller Unit/ Microprogrammed Control Unit  
+================================================================================
+--- PAGE 63 ---
+================================================================================
+                                           
+                                          GNSS Module Series  
+ 
+ 
+LC29H_ Series _Hardware_Design                                                       62 / 63 
+ 
+ 
+ 
+Abbreviation  Description  
+MSAS Multi-functional Satellite Augmentation Syst em (Japan)  
+MSL Moisture Sensitivity Levels  
+NF Noise F igure  
+NMEA  NMEA (National Marine Electronics Association) 0183 Interface Standard  
+NTRIP  Networked Transport of RTCM via Internet Protocol  
+OC Open Connector  
+PCB Printed Circuit Board  
+PI Power Input  
+PMU  Power Management Unit  
+PSRR  Power Supply Rejection Ratio  
+QR (code)  Quick Response (Code)  
+QZSS  Quasi -Zenith Satellite System  
+RAM Random Access Memory  
+RF Radio Frequency  
+RHCP  Right Hand Circular Polarization  
+RoHS Restriction of Hazardous Substances  
+ROM Read Only Memory  
+RTC Real-Time Clock  
+RTCM  Radio Technical Commission for Maritime Services  
+RTK Real-Time Kinematic  
+RXD Receive Data  (Pin)  
+SBAS  Satellite -Based Augmentation System  
+SMD  Surface Mount Device  
+SMT Surface Mount Technology  
+SPI Serial Peripheral Interface  
+================================================================================
+--- PAGE 64 ---
+================================================================================
+                                           
+                                          GNSS Module Series  
+ 
+ 
+LC29H_ Series _Hardware_Design                                                       63 / 63 
+ 
+ 
+ 
+Abbreviation  Description  
+TBD To Be Determined  
+TCXO  Temperature Compensated Crystal Oscillator  
+TTFF  Time to First Fix  
+TVS Transient Voltage Suppressor  
+UART  Universal Asynchronous Receiver/Transmitter  
+VSWR  Voltage Standi ng Wave Ratio  
+WAAS Wide Area Augmentation System  
+WI Warning  Indicator  
+XTAL  External Crystal Oscillator  
+ 

@@ -1,0 +1,315 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>RTK Rover</title>
+  <link rel="stylesheet" href="/vendor/leaflet/leaflet.css">
+  <script src="/vendor/highcharts/highcharts.js"></script>
+  <script src="/vendor/leaflet/leaflet.js"></script>
+  <style>
+    :root{color-scheme:dark;--bg:#0d1117;--panel:#161b22;--head:#21262d;--line:#30363d;--text:#c9d1d9;--muted:#8b949e;--green:#3fb950;--amber:#d29922;--red:#f85149;--blue:#58a6ff;--cyan:#39c5cf}
+    *{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--text);font:14px system-ui,-apple-system,Segoe UI,sans-serif}main{max-width:1080px;margin:auto;padding:20px}
+    .header{display:flex;justify-content:space-between;align-items:center;gap:14px;margin-bottom:16px}.title{font-size:24px;font-weight:750}.badge{display:inline-block;padding:10px 15px;border:1px solid;border-radius:7px;font-size:17px;font-weight:750}.fix-fixed{color:var(--green);background:#153b25;border-color:var(--green)}.fix-float{color:var(--amber);background:#3d2f00;border-color:var(--amber)}.fix-basic{color:var(--red);background:#3d1c1c;border-color:var(--red)}
+    .grid{display:grid;grid-template-columns:repeat(12,1fr);gap:12px}.span-12{grid-column:span 12}.span-8{grid-column:span 8}.span-7{grid-column:span 7}.span-6{grid-column:span 6}.span-5{grid-column:span 5}.span-4{grid-column:span 4}
+    .card{background:var(--panel);border:1px solid var(--line);border-radius:7px;overflow:hidden}.card h2{font-size:14px;margin:0;padding:11px 14px;background:var(--head);border-bottom:1px solid var(--line)}.body{padding:14px}.metrics{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;text-align:center}.label{text-transform:uppercase;color:var(--muted);font-size:11px;letter-spacing:.07em}.value{font-size:24px;font-weight:750;margin-top:4px}.small-value{font-size:16px;font-weight:700;margin-top:6px}.ok{color:var(--green)}.warn{color:var(--amber)}.bad{color:var(--red)}.muted{color:var(--muted)}
+    table{width:100%;border-collapse:collapse}td,th{padding:8px;border-bottom:1px solid var(--line);text-align:left}td:last-child,th:last-child{text-align:right}.chart{height:350px}.chart-short{height:300px}.map{height:350px;background:#0d1117}.note{padding:9px 14px;border-bottom:1px solid var(--line);color:var(--muted);font-size:12px}.pill{display:inline-block;border:1px solid var(--line);padding:2px 7px;border-radius:10px;font-size:11px;margin-left:5px}.button{border:1px solid var(--blue);background:transparent;color:var(--blue);padding:8px 12px;border-radius:5px;cursor:pointer;font-weight:650}.button:hover{background:#12243a}.footer{text-align:center;color:var(--muted);font-size:12px;margin:16px}.leaflet-control-layers,.leaflet-popup-content-wrapper,.leaflet-popup-tip{background:#21262d;color:var(--text)}
+    @media(max-width:780px){.span-8,.span-7,.span-6,.span-5,.span-4{grid-column:span 12}.metrics{grid-template-columns:repeat(2,1fr)}.title{font-size:19px}.chart,.map{height:310px}}
+  </style>
+</head>
+<body><main>
+  <div class="header"><div class="title">RTK Rover</div><div><span id="fix-badge" class="badge fix-basic">CONNECTING</span> <span id="uptime" class="muted"></span></div></div>
+
+  <div class="grid">
+    <section class="card span-12"><h2>Position solution</h2><div class="body"><div class="metrics">
+      <div><div class="label">Horizontal estimate</div><div id="hacc" class="value">-</div></div>
+      <div><div class="label">Vertical estimate</div><div id="vacc" class="value">-</div></div>
+      <div><div class="label">Satellites used</div><div id="sv" class="value">-</div></div>
+      <div><div class="label">Navigation fix</div><div id="fix-type" class="small-value">-</div></div>
+    </div></div></section>
+
+    <section class="card span-12"><h2>RTCM3 correction health</h2><div class="body"><div class="metrics">
+      <div><div class="label">Valid-looking frames</div><div id="packets" class="value ok">-</div></div>
+      <div><div class="label">Data received</div><div id="bytes" class="value" style="color:var(--cyan)">-</div></div>
+      <div><div class="label">Current rate</div><div id="rate" class="small-value">-</div></div>
+      <div><div class="label">Correction link</div><div id="last-rx" class="small-value">-</div></div>
+    </div></div></section>
+
+    <section class="card span-12"><h2>Reference displacement</h2><div class="body">
+      <div class="note" style="padding:0 0 12px;border:0">Set a local origin while stationary. The reference is accepted only with RTK FIXED and corrections received within the last 2 seconds.</div>
+      <button id="set-reference" class="button" type="button">Set current RTK-Fixed position as reference</button><span id="reference-status" class="muted" style="margin-left:10px">No reference set</span>
+      <div class="metrics" style="margin-top:14px"><div><div class="label">East</div><div id="ref-east" class="value">-</div></div><div><div class="label">North</div><div id="ref-north" class="value">-</div></div><div><div class="label">Up</div><div id="ref-up" class="value">-</div></div><div><div class="label">Horizontal distance</div><div id="ref-distance" class="value">-</div></div></div>
+      <div class="note" style="padding:10px 0 0;border:0;text-align:right">Bearing: <span id="ref-bearing">-</span></div>
+      <div id="reference-chart" class="chart-short"></div>
+      <div class="note" style="border-top:1px solid var(--line);border-bottom:0;margin-top:8px;padding:10px 0 0">Vertical displacement from reference (positive upward)</div><div id="reference-vertical-chart" class="chart-short"></div>
+    </div></section>
+
+    <section class="card span-7"><h2>Position scatter <span class="pill muted">RTK Fixed only</span></h2><div class="note">North is up; East is right. The red dot is the latest RTK-Fixed sample. Coordinates are local offsets from the rolling mean, not latitude/longitude.</div><div id="scatter-chart" class="chart"></div><div class="note"><span id="sample-count">0 samples</span><span style="float:right"><span id="recent-rms">Recent RMS: -</span> &nbsp; <span id="all-rms">Window RMS: -</span></span></div></section>
+    <section class="card span-5"><h2>Rover location</h2><div id="map-note" class="note">Waiting for a valid position.</div><div id="rover-map" class="map"></div></section>
+
+    <!-- ── TRACK RECORDING ─────────────────────────────────────────────── -->
+    <section class="card span-12"><h2>Track recording <span id="track-rec-badge" class="pill" style="background:#153b25;color:var(--green);border-color:var(--green)">● REC</span></h2><div class="body">
+      <div class="metrics">
+        <div><div class="label">Samples</div><div id="tk-count" class="value">-</div></div>
+        <div><div class="label">Duration</div><div id="tk-dur" class="value">-</div></div>
+        <div><div class="label">Distance</div><div id="tk-dist" class="value">-</div></div>
+        <div><div class="label">Buffer</div><div id="tk-buf" class="value">-</div></div>
+      </div>
+      <div style="margin-top:12px;display:flex;gap:8px;flex-wrap:wrap;align-items:center">
+        <button class="button" id="btn-rec-toggle" type="button">⏸ Pause</button>
+        <button class="button" id="btn-load-track" type="button">↓ Load &amp; Draw</button>
+        <button class="button" id="btn-waypoint" type="button">📍 Waypoint</button>
+        <button class="button" id="btn-clear-track" type="button" style="border-color:var(--red);color:var(--red)">✕ Clear</button>
+        <span id="tk-status" class="muted" style="font-size:12px"></span>
+      </div>
+    </div></section>
+
+    <section class="card span-8"><h2>Track map <span id="track-area" class="pill muted" style="display:none"></span></h2>
+      <div id="track-map" style="height:480px;background:#0d1117"></div>
+      <div style="padding:8px 14px;font-size:11px;color:var(--muted);border-top:1px solid var(--line)">
+        Speed: <span style="color:#3388ff">■</span> slow &nbsp;
+               <span style="color:#3fb950">■</span> walk &nbsp;
+               <span style="color:#d29922">■</span> jog &nbsp;
+               <span style="color:#f85149">■</span> fast &nbsp;|&nbsp;
+        <span style="color:#bc8cff">⬟</span> waypoint
+      </div>
+    </section>
+
+    <section class="card span-4"><h2>Track analysis</h2>
+      <div id="speed-chart" style="height:200px"></div>
+      <div style="padding:4px 14px;font-size:11px;color:var(--muted);border-top:1px solid var(--line)">Speed (m/s)</div>
+      <div id="altitude-chart" style="height:200px"></div>
+      <div style="padding:4px 14px;font-size:11px;color:var(--muted);border-top:1px solid var(--line)">Altitude (m)</div>
+      <div class="body" style="border-top:1px solid var(--line)">
+        <div style="font-size:12px;color:var(--muted);margin-bottom:8px">Export</div>
+        <div style="display:flex;gap:8px;margin-bottom:12px">
+          <button class="button" id="btn-gpx" type="button">⬇ GPX</button>
+          <button class="button" id="btn-csv" type="button">⬇ CSV</button>
+        </div>
+        <div style="font-size:12px;color:var(--muted);margin-bottom:6px">Replay</div>
+        <div style="display:flex;gap:8px;align-items:center">
+          <button class="button" id="btn-replay" type="button" disabled>▶ Play</button>
+          <select id="replay-speed" style="background:var(--head);color:var(--text);border:1px solid var(--line);border-radius:4px;padding:5px">
+            <option value="1">1×</option><option value="5">5×</option>
+            <option value="10">10×</option><option value="30">30×</option>
+          </select>
+        </div>
+      </div>
+    </section>
+
+    <section class="card span-8"><h2>RTCM3 messages</h2><div class="body"><table><thead><tr><th>Type</th><th>Description</th><th>Count</th></tr></thead><tbody id="rtcm-table"></tbody></table></div></section>
+    <section class="card span-4"><h2>Current coordinates</h2><div class="body"><table>
+      <tr><td>Latitude</td><td id="lat">-</td></tr><tr><td>Longitude</td><td id="lon">-</td></tr><tr><td>Altitude</td><td id="alt">-</td></tr><tr><td>3DR baud</td><td id="baud">-</td></tr><tr><td>Dashboard update</td><td id="updated">-</td></tr>
+    </table></div></section>
+  </div>
+  <div id="connection" class="footer">Connecting...</div>
+</main>
+
+<script>
+const RTCM_DESC={1005:'Base antenna reference point',1074:'GPS MSM4 observations',1084:'GLONASS MSM4 observations',1094:'Galileo MSM4 observations',1124:'BeiDou MSM4 observations',1230:'GLONASS code-phase biases'};
+const FIX_TYPE={0:'No fix',1:'Dead reckoning',2:'2D',3:'3D',4:'GNSS + DR',5:'TIME'};
+const chartsAvailable=typeof Highcharts!=='undefined',mapsAvailable=typeof L!=='undefined';
+let scatterChart,referenceChart,verticalChart,roverMap,roverMarker,referenceMarker,accuracyCircle,trailLine,displacementLine,lastMapLat,lastMapLon,esriTileFailed=false,previousTele,lastReferenceSession=null;
+
+function fmtBytes(n){if(n>=1048576)return(n/1048576).toFixed(1)+' MB';if(n>=1024)return(n/1024).toFixed(1)+' kB';return n+' B'}
+function fmtUp(s){const h=Math.floor(s/3600),m=Math.floor(s%3600/60);return h?h+'h '+m+'m':m?m+'m '+s%60+'s':s+'s'}
+function metricClass(mm,good,warn){return mm<=good?'ok':mm<=warn?'warn':'bad'}
+function rms(points){return points.length?Math.sqrt(points.reduce((sum,[e,n])=>sum+e*e+n*n,0)/points.length):0}
+
+function ensureScatter(){
+  if(scatterChart||!chartsAvailable)return;
+  scatterChart=Highcharts.chart('scatter-chart',{chart:{type:'scatter',backgroundColor:'transparent',animation:false},title:{text:null},credits:{enabled:false},legend:{enabled:false},xAxis:{title:{text:'East (mm)',style:{color:'#8b949e'}},gridLineWidth:1,gridLineColor:'#21262d',lineColor:'#30363d',labels:{style:{color:'#8b949e'}},plotLines:[{value:0,color:'#586069',width:1}]},yAxis:{title:{text:'North (mm)',style:{color:'#8b949e'}},gridLineColor:'#21262d',labels:{style:{color:'#8b949e'}},plotLines:[{value:0,color:'#586069',width:1}]},tooltip:{backgroundColor:'#21262d',borderColor:'#30363d',style:{color:'#c9d1d9'},formatter(){return `East: ${this.x.toFixed(1)} mm<br>North: ${this.y.toFixed(1)} mm`}},plotOptions:{series:{animation:false}},series:[{name:'History',color:'rgba(63,185,80,.22)',marker:{radius:3},data:[]},{name:'Recent',color:'#3fb950',marker:{radius:4},data:[]},{name:'Latest',color:'#f85149',marker:{radius:7},data:[]}]});
+}
+
+function ensureReferenceChart(){
+  if(referenceChart||!chartsAvailable)return;
+  referenceChart=Highcharts.chart('reference-chart',{chart:{type:'scatter',backgroundColor:'transparent',animation:false},title:{text:null},credits:{enabled:false},legend:{enabled:false},xAxis:{title:{text:'East from reference (mm)',style:{color:'#8b949e'}},gridLineColor:'#21262d',lineColor:'#30363d',labels:{style:{color:'#8b949e'}},plotLines:[{value:0,color:'#586069',width:1}]},yAxis:{title:{text:'North from reference (mm)',style:{color:'#8b949e'}},gridLineColor:'#21262d',labels:{style:{color:'#8b949e'}},plotLines:[{value:0,color:'#586069',width:1}]},tooltip:{backgroundColor:'#21262d',borderColor:'#30363d',style:{color:'#c9d1d9'},formatter(){return `East: ${this.x.toFixed(1)} mm<br>North: ${this.y.toFixed(1)} mm`}},series:[{name:'Path',color:'#58a6ff',lineWidth:1,marker:{radius:3},data:[]},{name:'Reference',color:'#3fb950',marker:{radius:5},data:[[0,0]]},{name:'Current',color:'#f85149',marker:{radius:7},data:[]}],plotOptions:{series:{animation:false}}});
+}
+
+function ensureVerticalChart(){
+  if(verticalChart||!chartsAvailable)return;
+  verticalChart=Highcharts.chart('reference-vertical-chart',{chart:{type:'line',backgroundColor:'transparent',animation:false},title:{text:null},credits:{enabled:false},legend:{enabled:false},xAxis:{title:{text:'Sample',style:{color:'#8b949e'}},gridLineColor:'#21262d',lineColor:'#30363d',labels:{style:{color:'#8b949e'}}},yAxis:{title:{text:'Up from reference (mm)',style:{color:'#8b949e'}},gridLineColor:'#21262d',labels:{style:{color:'#8b949e'}},plotLines:[{value:0,color:'#586069',width:1}]},tooltip:{backgroundColor:'#21262d',borderColor:'#30363d',style:{color:'#c9d1d9'},pointFormat:'<b>{point.y:.1f} mm</b>'},series:[{name:'Up',color:'#bc8cff',lineWidth:2,marker:{radius:3},data:[]}],plotOptions:{series:{animation:false}}});
+}
+
+function updateReference(r){
+  const button=document.getElementById('set-reference'),status=document.getElementById('reference-status');
+  if(!r||!r.set){button.textContent='Set current RTK-Fixed position as reference';status.textContent=r&&r.error?'RTK FIXED with fresh corrections required':'No reference set';status.className=''+(r&&r.error?'bad':'muted');lastReferenceSession=null;if(referenceChart){referenceChart.series.forEach(s=>s.setData([],false,false,false));referenceChart.redraw()}if(verticalChart){verticalChart.series[0].setData([],true,false,false)}return}
+  button.textContent='Reset reference to current position';status.textContent='Reference set at '+r.lat.toFixed(8)+'°, '+r.lon.toFixed(8)+'°';status.className='ok';
+  document.getElementById('ref-east').textContent=(r.eastMm>=0?'+':'')+r.eastMm+' mm';document.getElementById('ref-north').textContent=(r.northMm>=0?'+':'')+r.northMm+' mm';document.getElementById('ref-up').textContent=(r.upMm>=0?'+':'')+r.upMm+' mm';document.getElementById('ref-distance').textContent=r.distanceMm.toFixed(1)+' mm';document.getElementById('ref-bearing').textContent=r.bearingDeg.toFixed(1)+'°';
+  if(!chartsAvailable)return;ensureReferenceChart();ensureVerticalChart();const pts=(r.history||[]).map(p=>[p[0],p[1]]),vertical=(r.history||[]).map((p,i)=>[i,p[2]]),all=[[0,0],...[...pts],[r.eastMm,r.northMm]],max=Math.max(20,...all.flatMap(p=>[Math.abs(p[0]),Math.abs(p[1])]));const range=Math.ceil(max/10)*10+5;if(lastReferenceSession!==r.session){referenceChart.series[0].setData([],false,false,false);verticalChart.series[0].setData([],false,false,false);lastReferenceSession=r.session}referenceChart.xAxis[0].setExtremes(-range,range,false,false);referenceChart.yAxis[0].setExtremes(-range,range,false,false);referenceChart.series[0].setData(pts,false,false,false);referenceChart.series[1].setData([[0,0]],false,false,false);referenceChart.series[2].setData([[r.eastMm,r.northMm]],true,false,false);verticalChart.series[0].setData(vertical,true,false,false);
+}
+
+function updateScatter(history){
+  const count=history?.length||0;document.getElementById('sample-count').textContent=count+' samples';
+  if(count<2||!chartsAvailable)return;
+  ensureScatter();let sumLat=0,sumLon=0;history.forEach(([la,lo])=>{sumLat+=la;sumLon+=lo});const meanLat=sumLat/count,meanLon=sumLon/count,cosLat=Math.cos(meanLat/1e7*Math.PI/180);
+  const points=history.map(([la,lo])=>[(lo-meanLon)/1e7*111320*cosLat*1000,(la-meanLat)/1e7*111320*1000]);const range=Math.ceil(Math.max(20,...points.flatMap(([e,n])=>[Math.abs(e),Math.abs(n)]))/10)*10;
+  scatterChart.xAxis[0].setExtremes(-range,range,false,false);scatterChart.yAxis[0].setExtremes(-range,range,false,false);const split=Math.max(0,count-30);
+  scatterChart.series[0].setData(points.slice(0,split),false,false,false);scatterChart.series[1].setData(points.slice(split,-1),false,false,false);scatterChart.series[2].setData([points[count-1]],true,false,false);
+  document.getElementById('recent-rms').textContent='Recent RMS: '+rms(points.slice(-30)).toFixed(1)+' mm';document.getElementById('all-rms').textContent='Window RMS: '+rms(points).toFixed(1)+' mm';
+}
+
+function updateMap(d){
+  const note=document.getElementById('map-note');if(d.fixType<2||!d.lat||!d.lon){note.textContent='Waiting for a valid position.';return}if(!mapsAvailable){note.textContent='Local Leaflet files are unavailable.';note.className='note bad';return}
+  const ll=[d.lat,d.lon],radius=Math.max(.05,d.hAcc),history=(d.posHist||[]).map(([la,lo])=>[la/1e7,lo/1e7]);
+  if(!roverMap){roverMap=L.map('rover-map').setView(ll,19);const esri=L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',{maxZoom:20,attribution:'Tiles &copy; Esri &mdash; Source: Esri, Vantor, Earthstar Geographics, and the GIS User Community'}),osm=L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png',{maxZoom:19,attribution:'&copy; OpenStreetMap contributors'});esri.addTo(roverMap);L.control.layers({'Esri World Imagery':esri,'OpenStreetMap':osm},null,{collapsed:true}).addTo(roverMap);let errors=0;esri.on('tileerror',()=>{if(++errors===3){esriTileFailed=true;note.textContent='Esri imagery unavailable. Select OpenStreetMap.';note.className='note warn'}})}
+  const popup=`<b>${d.fix}</b><br>${d.lat.toFixed(8)}&deg;<br>${d.lon.toFixed(8)}&deg;<br>HACC: ${(d.hAcc*1000).toFixed(0)} mm`;
+  if(!roverMarker)roverMarker=L.marker(ll).addTo(roverMap);else roverMarker.setLatLng(ll);roverMarker.bindPopup(popup);if(!accuracyCircle)accuracyCircle=L.circle(ll,{radius,color:'#f85149',weight:2,fillOpacity:.12}).addTo(roverMap);else accuracyCircle.setLatLng(ll).setRadius(radius);if(!trailLine)trailLine=L.polyline(history,{color:'#58a6ff',weight:2,opacity:.75}).addTo(roverMap);else trailLine.setLatLngs(history);
+  if(d.reference&&d.reference.set){const refll=[d.reference.lat,d.reference.lon];if(!referenceMarker)referenceMarker=L.marker(refll,{opacity:.8}).addTo(roverMap);else referenceMarker.setLatLng(refll);referenceMarker.bindPopup(`<b>Reference</b><br>${d.reference.lat.toFixed(8)}&deg;<br>${d.reference.lon.toFixed(8)}&deg;`);if(!displacementLine)displacementLine=L.polyline([refll,ll],{color:'#f85149',weight:2,dashArray:'6 5'}).addTo(roverMap);else displacementLine.setLatLngs([refll,ll])}else{if(referenceMarker){roverMap.removeLayer(referenceMarker);referenceMarker=null}if(displacementLine){roverMap.removeLayer(displacementLine);displacementLine=null}}
+  if(lastMapLat===undefined||Math.abs(lastMapLat-d.lat)>0.00005||Math.abs(lastMapLon-d.lon)>0.00005)roverMap.setView(ll,19);lastMapLat=d.lat;lastMapLon=d.lon;if(!esriTileFailed){note.textContent='Current rover position; red circle is the reported horizontal estimate.';note.className='note'}setTimeout(()=>roverMap.invalidateSize(false),0);
+}
+
+async function update(){try{
+  const response=await fetch('/api/status',{cache:'no-store'});if(!response.ok)throw Error('HTTP '+response.status);const d=await response.json(),now=performance.now(),badge=document.getElementById('fix-badge');badge.textContent=d.fix;badge.className='badge '+(d.carr===2?'fix-fixed':d.carr===1?'fix-float':'fix-basic');document.getElementById('uptime').textContent='up '+fmtUp(d.uptime);
+  const hMm=d.hAcc*1000,vMm=d.vAcc*1000,h=document.getElementById('hacc'),v=document.getElementById('vacc');h.textContent=hMm.toFixed(0)+' mm';h.className='value '+metricClass(hMm,30,100);v.textContent=vMm.toFixed(0)+' mm';v.className='value '+metricClass(vMm,50,150);document.getElementById('sv').textContent=d.sv;document.getElementById('sv').className='value '+(d.sv>=20?'ok':d.sv>=12?'warn':'bad');document.getElementById('fix-type').textContent=FIX_TYPE[d.fixType]||d.fixType;
+  document.getElementById('packets').textContent=d.tele.pkts.toLocaleString();document.getElementById('bytes').textContent=fmtBytes(d.tele.bytes);let rate='measuring...';if(previousTele){const seconds=(now-previousTele.time)/1000,frames=(d.tele.pkts-previousTele.frames)/seconds,bytes=(d.tele.bytes-previousTele.bytes)/seconds;rate=frames.toFixed(1)+' fps / '+fmtBytes(Math.max(0,Math.round(bytes)))+'/s'}previousTele={time:now,frames:d.tele.pkts,bytes:d.tele.bytes};document.getElementById('rate').textContent=rate;
+  const age=d.tele.ageSec,last=document.getElementById('last-rx');last.textContent=age<2?'LIVE':age<9999?age+' s old':'NEVER';last.className='small-value '+(age<2?'ok':age<5?'warn':'bad');document.getElementById('baud').textContent=d.tele.baud.toLocaleString()+' bps';
+  document.getElementById('rtcm-table').innerHTML=Object.entries(d.rtcm).map(([type,count])=>`<tr><td><b>${type}</b></td><td class="muted">${RTCM_DESC[type]||'Unknown'}</td><td>${count.toLocaleString()}</td></tr>`).join('');document.getElementById('lat').textContent=d.lat.toFixed(8)+' deg';document.getElementById('lon').textContent=d.lon.toFixed(8)+' deg';document.getElementById('alt').textContent=d.alt.toFixed(2)+' m';document.getElementById('updated').textContent=new Date().toLocaleTimeString();
+  updateScatter(d.posHist);updateReference(d.reference);updateMap(d);document.getElementById('connection').textContent='Dashboard connected';document.getElementById('connection').className='footer ok';
+}catch(error){document.getElementById('connection').textContent='Connection error: '+error.message;document.getElementById('connection').className='footer bad'}}
+
+document.getElementById('set-reference').addEventListener('click',async()=>{const status=document.getElementById('reference-status');status.textContent='Checking RTK FIXED status...';try{const response=await fetch('/api/reference',{method:'POST'});if(!response.ok)throw Error('RTK FIXED with fresh corrections required');await update()}catch(error){status.textContent=error.message;status.className='bad'}});
+
+// ── Track recording ───────────────────────────────────────────────────────────
+let trackMap=null,loadedPoints=[],loadedWaypoints=[],replayMarker=null,replayInterval=null,replayIdx=0,speedChart=null,altChart=null,waypointMarkers=[];
+
+function speedColor(mps){return mps<0.3?'#3388ff':mps<1.5?'#3fb950':mps<3.0?'#d29922':'#f85149'}
+function fmtDur(ms){const s=Math.floor(ms/1000),h=Math.floor(s/3600),m=Math.floor(s%3600/60);return h?h+'h '+m+'m':(m?m+'m '+s%60+'s':s+'s')}
+function shoelaceM2(pts){if(pts.length<3)return 0;const c=Math.cos(pts[0][0]*Math.PI/180);let a=0;for(let i=0;i<pts.length;i++){const j=(i+1)%pts.length,xi=pts[i][1]*111320*c,yi=pts[i][0]*111320,xj=pts[j][1]*111320*c,yj=pts[j][0]*111320;a+=xi*yj-xj*yi}return Math.abs(a/2)}
+
+function ensureTrackMap(){
+  if(trackMap)return;
+  trackMap=L.map('track-map').setView([46.466,6.861],18);
+  const esri=L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',{maxNativeZoom:20,maxZoom:22,attribution:'Tiles © Esri'});
+  const osm=L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png',{maxNativeZoom:19,maxZoom:22,attribution:'© OpenStreetMap contributors'});
+  esri.addTo(trackMap);L.control.layers({'Esri World Imagery':esri,'OpenStreetMap':osm},null,{collapsed:true}).addTo(trackMap);
+  setTimeout(()=>trackMap.invalidateSize(false),100);
+}
+
+function drawTrack(pts,wpts){
+  if(!trackMap||pts.length<2)return;
+  waypointMarkers.forEach(m=>trackMap.removeLayer(m));waypointMarkers=[];
+  // Speed-coloured polyline segments
+  for(let i=1;i<pts.length;i++){
+    const a=pts[i-1],b=pts[i];
+    L.polyline([[a.lat,a.lon],[b.lat,b.lon]],{color:speedColor((a.spd+b.spd)/2),weight:3,opacity:.85}).addTo(trackMap);
+  }
+  // Start / end dots
+  const dot=(ll,col,label)=>{const ic=L.divIcon({html:`<div style="width:10px;height:10px;border-radius:50%;background:${col};border:2px solid #fff"></div>`,iconSize:[10,10],iconAnchor:[5,5]});L.marker(ll,{icon:ic}).addTo(trackMap).bindPopup(label)};
+  dot([pts[0].lat,pts[0].lon],'#3fb950','Start');dot([pts[pts.length-1].lat,pts[pts.length-1].lon],'#f85149','End');
+  // Waypoint bubbles
+  (wpts||[]).forEach((w,i)=>{
+    const ic=L.divIcon({html:`<div style="background:#bc8cff;color:#fff;border-radius:50%;width:20px;height:20px;line-height:20px;text-align:center;font-size:10px;font-weight:bold;border:2px solid #fff">${i+1}</div>`,iconSize:[20,20],iconAnchor:[10,10]});
+    const m=L.marker([w.lat,w.lon],{icon:ic}).addTo(trackMap).bindPopup(`<b>Waypoint ${i+1}</b><br>${w.lat.toFixed(8)}°<br>Alt: ${w.alt.toFixed(2)} m`);
+    waypointMarkers.push(m);
+  });
+  // Fit bounds
+  trackMap.fitBounds(L.latLngBounds(pts.map(p=>[p.lat,p.lon])).pad(0.1));
+  // Area badge
+  const area=shoelaceM2(pts.map(p=>[p.lat,p.lon]));
+  const ab=document.getElementById('track-area');
+  if(area>1){ab.textContent='Area: '+(area<10000?area.toFixed(0)+' m²':(area/10000).toFixed(2)+' ha');ab.style.display=''}else{ab.style.display='none'}
+  // Replay marker
+  if(replayMarker)trackMap.removeLayer(replayMarker);
+  const ri=L.divIcon({html:'<div style="width:14px;height:14px;border-radius:50%;background:#fff;border:3px solid #f85149;box-shadow:0 0 6px rgba(0,0,0,.5)"></div>',iconSize:[14,14],iconAnchor:[7,7]});
+  replayMarker=L.marker([pts[0].lat,pts[0].lon],{icon:ri,zIndexOffset:1000}).addTo(trackMap);
+  replayMarker.setOpacity(0);
+}
+
+function ensureSpeedChart(){
+  if(speedChart||!chartsAvailable)return;
+  speedChart=Highcharts.chart('speed-chart',{chart:{type:'area',backgroundColor:'transparent',animation:false,margin:[8,8,18,38]},title:{text:null},credits:{enabled:false},legend:{enabled:false},xAxis:{visible:false},yAxis:{min:0,title:{text:null},gridLineColor:'#21262d',labels:{style:{color:'#8b949e'}}},tooltip:{backgroundColor:'#21262d',borderColor:'#30363d',style:{color:'#c9d1d9'},pointFormat:'<b>{point.y:.2f} m/s</b>'},plotOptions:{series:{animation:false}},series:[{color:'#3fb950',fillColor:{linearGradient:{x1:0,y1:0,x2:0,y2:1},stops:[[0,'rgba(63,185,80,.4)'],[1,'rgba(63,185,80,.03)']]},lineWidth:1.5,marker:{enabled:false},data:[]}]});
+}
+
+function ensureAltChart(){
+  if(altChart||!chartsAvailable)return;
+  altChart=Highcharts.chart('altitude-chart',{chart:{type:'area',backgroundColor:'transparent',animation:false,margin:[8,8,18,52]},title:{text:null},credits:{enabled:false},legend:{enabled:false},xAxis:{visible:false},yAxis:{title:{text:null},gridLineColor:'#21262d',labels:{style:{color:'#8b949e'}}},tooltip:{backgroundColor:'#21262d',borderColor:'#30363d',style:{color:'#c9d1d9'},pointFormat:'<b>{point.y:.2f} m</b>'},plotOptions:{series:{animation:false}},series:[{color:'#58a6ff',fillColor:{linearGradient:{x1:0,y1:0,x2:0,y2:1},stops:[[0,'rgba(88,166,255,.4)'],[1,'rgba(88,166,255,.03)']]},lineWidth:1.5,marker:{enabled:false},data:[]}]});
+}
+
+function drawAnalysis(pts){
+  if(!chartsAvailable||!pts.length)return;
+  ensureSpeedChart();ensureAltChart();
+  const step=Math.max(1,Math.floor(pts.length/500));
+  const spd=[],alt=[];
+  pts.forEach((p,i)=>{if(i%step===0){spd.push(p.spd);alt.push(p.alt)}});
+  speedChart.series[0].setData(spd,true,false,false);
+  if(alt.length){const minA=Math.min(...alt),maxA=Math.max(...alt),pad=Math.max((maxA-minA)*0.2,0.5);altChart.yAxis[0].setExtremes(minA-pad,maxA+pad,false,false)}
+  altChart.series[0].setData(alt,true,false,false);
+}
+
+async function loadTrack(){
+  const st=document.getElementById('tk-status');
+  st.textContent='Fetching info...';st.className='muted';
+  try{
+    const info=await(await fetch('/api/track/info',{cache:'no-store'})).json();
+    if(!info.count){st.textContent='Buffer is empty';return}
+    ensureTrackMap();
+    const decimation=Math.max(1,Math.floor(info.count/2000));
+    st.textContent=`Loading ${info.count} samples (${decimation}× decimated)…`;
+    const pts=[],pageSize=500;
+    for(let offset=0;offset<info.count;offset+=pageSize*decimation){
+      const page=await(await fetch(`/api/track/points?offset=${offset}&count=${pageSize}&decimation=${decimation}`,{cache:'no-store'})).json();
+      pts.push(...page);
+      st.textContent=`Loading… ${Math.min(100,Math.round(pts.length/(info.count/decimation)*100))}%`;
+    }
+    const wpts=await(await fetch('/api/track/waypoints',{cache:'no-store'})).json();
+    loadedPoints=pts;loadedWaypoints=wpts;
+    drawTrack(pts,wpts);drawAnalysis(pts);
+    document.getElementById('btn-replay').disabled=pts.length<2;
+    st.textContent=`${pts.length} pts · ${wpts.length} waypoints · ${info.distanceM<1000?info.distanceM.toFixed(0)+' m':(info.distanceM/1000).toFixed(2)+' km'}`;
+    st.className='ok';
+  }catch(e){st.textContent='Error: '+e.message;st.className='bad'}
+}
+
+function startReplay(){
+  if(loadedPoints.length<2)return;
+  const btn=document.getElementById('btn-replay'),spd=parseInt(document.getElementById('replay-speed').value)||1;
+  if(replayInterval){clearInterval(replayInterval);replayInterval=null;replayIdx=0;replayMarker?.setOpacity(0);btn.textContent='▶ Play';return}
+  replayIdx=0;replayMarker?.setOpacity(1);btn.textContent='⏹ Stop';
+  replayInterval=setInterval(()=>{
+    if(replayIdx>=loadedPoints.length){clearInterval(replayInterval);replayInterval=null;btn.textContent='▶ Play';replayMarker?.setOpacity(0);return}
+    const p=loadedPoints[replayIdx++];
+    replayMarker?.setLatLng([p.lat,p.lon]);
+    if(trackMap&&replayIdx%10===0)trackMap.panTo([p.lat,p.lon],{animate:false});
+  },Math.max(20,200/spd));
+}
+
+async function updateTrackInfo(){
+  try{
+    const i=await(await fetch('/api/track/info',{cache:'no-store'})).json();
+    document.getElementById('tk-count').textContent=i.count.toLocaleString();
+    document.getElementById('tk-dur').textContent=i.durationMs?fmtDur(i.durationMs):'-';
+    document.getElementById('tk-dist').textContent=i.distanceM<1000?i.distanceM.toFixed(0)+' m':(i.distanceM/1000).toFixed(2)+' km';
+    document.getElementById('tk-buf').textContent=i.bufferPct+'%';
+    const b=document.getElementById('track-rec-badge');
+    if(i.recording){b.textContent='● REC';b.style.color='var(--green)';b.style.borderColor='var(--green)';b.style.background='#153b25'}
+    else{b.textContent='⏸ PAUSED';b.style.color='var(--amber)';b.style.borderColor='var(--amber)';b.style.background='#3d2f00'}
+    document.getElementById('btn-rec-toggle').textContent=i.recording?'⏸ Pause':'▶ Resume';
+  }catch(e){}
+}
+
+document.getElementById('btn-rec-toggle').addEventListener('click',async()=>{await fetch('/api/track/pause',{method:'POST'});updateTrackInfo()});
+document.getElementById('btn-load-track').addEventListener('click',()=>loadTrack());
+document.getElementById('btn-waypoint').addEventListener('click',async()=>{
+  const st=document.getElementById('tk-status');
+  const r=await fetch('/api/track/waypoint',{method:'POST'});
+  const j=await r.json();st.textContent=j.ok?'Waypoint added!':'RTK FIXED required';st.className=j.ok?'ok':'bad';
+  setTimeout(()=>{st.textContent='';st.className='muted'},3000);
+});
+document.getElementById('btn-clear-track').addEventListener('click',async()=>{
+  if(!confirm('Clear all recorded track data?'))return;
+  await fetch('/api/track/clear',{method:'POST'});
+  loadedPoints=[];loadedWaypoints=[];
+  if(trackMap){trackMap.eachLayer(l=>{if(!(l instanceof L.TileLayer||l instanceof L.Control))trackMap.removeLayer(l)});replayMarker=null;waypointMarkers=[]}
+  document.getElementById('track-area').style.display='none';
+  document.getElementById('btn-replay').disabled=true;
+  updateTrackInfo();
+});
+document.getElementById('btn-gpx').addEventListener('click',()=>{window.location='/api/track/export/gpx'});
+document.getElementById('btn-csv').addEventListener('click',()=>{window.location='/api/track/export/csv'});
+document.getElementById('btn-replay').addEventListener('click',startReplay);
+
+updateTrackInfo();setInterval(updateTrackInfo,10000);
+
+update();setInterval(update,2000);
+</script></body></html>

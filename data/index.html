@@ -1,0 +1,142 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>RTK Base Station</title>
+  <link rel="stylesheet" href="/vendor/leaflet/leaflet.css">
+  <script src="/vendor/highcharts/highcharts.js"></script>
+  <script src="/vendor/highcharts/highcharts-more.js"></script>
+  <script src="/vendor/leaflet/leaflet.js"></script>
+  <style>
+    :root{color-scheme:dark;--bg:#0d1117;--panel:#161b22;--head:#21262d;--line:#30363d;--text:#c9d1d9;--muted:#8b949e;--green:#3fb950;--amber:#d29922;--red:#f85149;--blue:#58a6ff;--cyan:#39c5cf}
+    *{box-sizing:border-box} body{margin:0;background:var(--bg);color:var(--text);font:14px system-ui,-apple-system,Segoe UI,sans-serif}
+    main{max-width:1080px;margin:auto;padding:20px}.header{display:flex;justify-content:space-between;align-items:center;gap:14px;margin-bottom:16px}.title{font-size:24px;font-weight:750}.badge{padding:9px 14px;border-radius:7px;font-weight:750}.ok{color:var(--green)}.warn{color:var(--amber)}.bad{color:var(--red)}.bg-ok{background:#1a7f4b}.bg-warn{background:#7a5700}.muted{color:var(--muted)}
+    .grid{display:grid;grid-template-columns:repeat(12,1fr);gap:12px}.span-12{grid-column:span 12}.span-8{grid-column:span 8}.span-7{grid-column:span 7}.span-6{grid-column:span 6}.span-5{grid-column:span 5}.span-4{grid-column:span 4}
+    .card{background:var(--panel);border:1px solid var(--line);border-radius:7px;overflow:hidden}.card h2{font-size:14px;margin:0;padding:11px 14px;background:var(--head);border-bottom:1px solid var(--line)}.body{padding:14px}.metrics{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;text-align:center}.label{text-transform:uppercase;color:var(--muted);font-size:11px;letter-spacing:.07em}.value{font-size:24px;font-weight:750;margin-top:4px}.small-value{font-size:16px;font-weight:700;margin-top:6px}.report-button{display:inline-block;border:1px solid var(--blue);color:var(--blue);padding:8px 11px;border-radius:5px;text-decoration:none}.report-button:hover{background:#12243b}
+    table{width:100%;border-collapse:collapse}td,th{padding:7px 8px;border-bottom:1px solid var(--line);text-align:left}td:last-child,th:last-child{text-align:right}.progress{height:7px;background:#252b33;border-radius:4px;overflow:hidden}.bar{height:100%;background:var(--blue);width:0}.rowline{display:flex;justify-content:space-between;margin:8px 0 5px}.hidden{display:none}.chart{height:350px}.chart-short{height:300px}.map{height:520px;background:#0d1117}.map-note{padding:9px 14px;border-bottom:1px solid var(--line)}.footer{text-align:center;color:var(--muted);font-size:12px;margin:16px}.button{border:1px solid var(--red);background:transparent;color:var(--red);padding:7px 10px;border-radius:5px;cursor:pointer}.button:hover{background:#3b171b}.config-button{border-color:var(--blue);color:var(--blue)}.config-button:hover{background:#12243b}.number-input{width:130px;background:#0d1117;color:var(--text);border:1px solid var(--line);border-radius:5px;padding:8px}.pill{display:inline-block;border:1px solid var(--line);padding:2px 6px;border-radius:10px;font-size:11px;margin-left:5px}.leaflet-control-layers,.leaflet-popup-content-wrapper,.leaflet-popup-tip{background:#21262d;color:var(--text)}
+    @media(max-width:780px){.span-8,.span-7,.span-6,.span-5,.span-4{grid-column:span 12}.metrics{grid-template-columns:repeat(2,1fr)}.title{font-size:19px}.chart{height:310px}}
+  </style>
+</head>
+<body><main>
+  <div class="header"><div class="title">RTK Base Station</div><div><span id="state" class="badge">CONNECTING</span> <span id="uptime" class="muted"></span></div></div>
+
+  <div class="grid">
+    <section id="survey-card" class="card span-12 hidden"><h2 id="survey-title">Survey-In convergence</h2><div class="body">
+      <div id="survey-note" class="muted" style="margin-bottom:12px">Lower uncertainty is better.</div>
+      <div class="metrics"><div><div class="label">Survey elapsed</div><div id="sv-time" class="value">-</div></div><div><div class="label">Position uncertainty</div><div id="sv-acc" class="value">-</div></div><div><div class="label">Time target</div><div id="sv-time-target" class="small-value">-</div></div><div><div class="label">Uncertainty target</div><div id="sv-acc-target" class="small-value">-</div></div></div>
+      <div class="rowline"><span id="sv-progress-label" class="muted">Time requirement</span><span id="sv-time-pct">0%</span></div><div class="progress"><div id="sv-time-bar" class="bar"></div></div>
+      <div id="survey-chart" class="chart-short"></div>
+    </div></section>
+
+    <section class="card span-12"><h2>RTCM3 relay health</h2><div class="body"><div class="metrics">
+      <div><div class="label">Valid frames</div><div id="frames" class="value ok">-</div></div>
+      <div><div class="label">Data relayed</div><div id="bytes" class="value" style="color:var(--cyan)">-</div></div>
+      <div><div class="label">Current rate</div><div id="rate" class="small-value">-</div></div>
+      <div><div class="label">Last RTCM</div><div id="rtcm-age" class="small-value">-</div></div>
+    </div></div></section>
+
+    <section class="card span-7"><h2>Satellite sky plot <span id="sat-age" class="pill muted"></span></h2><div id="sky-chart" class="chart"></div></section>
+    <section class="card span-5"><h2>Signal strength (C/N0)</h2><div id="cno-chart" class="chart"></div></section>
+
+    <section class="card span-8"><h2>RTCM message freshness</h2><div class="body"><table><thead><tr><th>Type</th><th>Description</th><th>Count</th><th>Age</th></tr></thead><tbody id="rtcm-types"></tbody></table></div></section>
+    <section class="card span-4"><h2>GNSS quality</h2><div class="body"><table>
+      <tr><td>Satellites used</td><td id="sv-used">-</td></tr><tr><td>Fix type</td><td id="fix">-</td></tr><tr><td>PDOP</td><td id="pdop">-</td></tr><tr><td>Horizontal estimate</td><td id="hacc">-</td></tr><tr><td>GNSS module</td><td id="module">-</td></tr><tr><td>Firmware / protocol</td><td id="fw">-</td></tr>
+    </table></div></section>
+
+    <section class="card span-12"><h2>Survey-In configuration</h2><div class="body">
+      <form method="post" action="/api/survey-target" id="survey-target-form" style="display:flex;align-items:center;flex-wrap:wrap;gap:10px">
+        <label for="survey-target-mm">Target accuracy</label>
+        <input class="number-input" id="survey-target-mm" name="targetMm" type="number" min="10" max="10000" step="1" required>
+        <span>mm</span>
+        <button class="button config-button" type="submit">Apply target</button>
+        <span id="survey-target-note" class="muted"></span>
+      </form>
+    </div></section>
+
+    <section class="card span-7"><h2>Base profile</h2><div class="body" id="profile">-</div></section>
+    <section class="card span-5"><h2>System</h2><div class="body"><table>
+      <tr><td>Wi-Fi</td><td id="wifi">-</td></tr><tr><td>IP address</td><td id="ip">-</td></tr><tr><td>Free / minimum heap</td><td id="heap">-</td></tr><tr><td>Free PSRAM</td><td id="psram">-</td></tr><tr><td>RTCM CRC errors</td><td id="crc">-</td></tr><tr><td>Framing errors</td><td id="length-errors">-</td></tr><tr><td>3DR TX free</td><td id="tx-free">-</td></tr><tr><td>Firmware build</td><td id="build">-</td></tr>
+    </table></div></section>
+
+    <section class="card span-12"><h2>Session reports</h2><div class="body">
+      <div id="report-status" class="muted">Waiting for recorder status...</div>
+      <div style="display:flex;flex-wrap:wrap;gap:10px;margin-top:12px">
+        <a class="report-button" href="/api/report/session.csv" download>Download CSV</a>
+        <a class="report-button" href="/api/report/session.json" download>Download JSON</a>
+        <a class="report-button" href="/api/report/summary" target="_blank">Open summary</a>
+      </div>
+    </div></section>
+
+    <section class="card span-12"><h2>Base location</h2><div id="map-note" class="map-note muted">Map becomes available when a base position is saved.</div><div id="base-map" class="map"></div></section>
+  </div>
+  <div id="updated" class="footer">Connecting...</div>
+</main>
+
+<script>
+const COLORS={0:'#3fb950',1:'#58a6ff',2:'#d29922',3:'#8b949e',4:'#8b949e',5:'#bc8cff',6:'#f778ba'};
+const GNSS={0:'GPS',1:'SBAS',2:'Galileo',3:'BeiDou',4:'IMES',5:'QZSS',6:'GLONASS'};
+const GNSS_IDS=[0,1,2,3,4,5,6];
+const RTCM_DESC={1005:'Base antenna reference point',1074:'GPS MSM4',1084:'GLONASS MSM4',1094:'Galileo MSM4',1124:'BeiDou MSM4',1230:'GLONASS code-phase biases'};
+const FIX={0:'No fix',1:'Dead reckoning',2:'2D',3:'3D',4:'GNSS+DR',5:'TIME'};
+let skyChart,cnoChart,surveyChart,baseMap,baseMarker,uncertaintyCircle,lastMapLat,lastMapLon,esriTileFailed=false;
+const chartsAvailable=typeof Highcharts!=='undefined';
+const mapsAvailable=typeof L!=='undefined';
+
+function hcBase(){return{chart:{backgroundColor:'transparent',animation:false},title:{text:null},credits:{enabled:false},legend:{itemStyle:{color:'#c9d1d9'},itemHoverStyle:{color:'#fff'}},tooltip:{backgroundColor:'#21262d',borderColor:'#30363d',style:{color:'#c9d1d9'}}}}
+function initCharts(){
+  if(!chartsAvailable){document.getElementById('sky-chart').innerHTML='<div class="body warn">Charts unavailable: internet access is required until Highcharts is stored locally.</div>';document.getElementById('cno-chart').innerHTML='<div class="body muted">Numeric base status remains operational.</div>';return}
+  skyChart=Highcharts.chart('sky-chart',Highcharts.merge(hcBase(),{chart:{polar:true,type:'scatter'},pane:{startAngle:0,endAngle:360},xAxis:{min:0,max:360,tickInterval:45,gridLineColor:'#30363d',lineColor:'#30363d',labels:{style:{color:'#8b949e'},format:'{value} deg'}},yAxis:{min:0,max:90,tickPositions:[0,30,60,90],gridLineInterpolation:'circle',gridLineColor:'#30363d',labels:{style:{color:'#8b949e'},formatter(){return (90-this.value)+' deg'}},title:{text:null}},plotOptions:{series:{animation:false},scatter:{marker:{radius:5},dataLabels:{enabled:true,formatter(){return this.point.used?this.point.name:''},style:{color:'#c9d1d9',fontSize:'9px',textOutline:'none'}},tooltip:{pointFormatter(){return `<b>${this.name}</b><br>Elevation: ${90-this.y} deg<br>Azimuth: ${this.x} deg<br>C/N0: ${this.cno} dB-Hz<br>${this.used?'Used in solution':'Visible, not used'}`}}}},series:GNSS_IDS.map(g=>({id:'gnss-'+g,name:GNSS[g],color:COLORS[g],data:[],animation:false}))}));
+  cnoChart=Highcharts.chart('cno-chart',Highcharts.merge(hcBase(),{chart:{type:'bar'},xAxis:{categories:[],labels:{style:{color:'#c9d1d9',fontSize:'10px'}},lineColor:'#30363d'},yAxis:{min:0,max:60,title:{text:'dB-Hz',style:{color:'#8b949e'}},gridLineColor:'#30363d',labels:{style:{color:'#8b949e'}},plotBands:[{from:0,to:25,color:'rgba(248,81,73,.08)'},{from:35,to:60,color:'rgba(63,185,80,.06)'}]},plotOptions:{series:{animation:false}},legend:{enabled:false},series:[{name:'C/N0',data:[],animation:false}]}));
+  surveyChart=Highcharts.chart('survey-chart',Highcharts.merge(hcBase(),{chart:{type:'spline'},xAxis:{title:{text:'Survey seconds',style:{color:'#8b949e'}},labels:{style:{color:'#8b949e'}},gridLineColor:'#30363d'},yAxis:{min:0,title:{text:'Estimated uncertainty (m)',style:{color:'#8b949e'}},labels:{style:{color:'#8b949e'}},gridLineColor:'#30363d'},plotOptions:{series:{animation:false}},series:[{name:'Estimated position uncertainty',color:'#58a6ff',data:[],animation:false},{name:'Maximum allowed',color:'#f85149',dashStyle:'Dash',marker:{enabled:false},data:[],animation:false}]}));
+}
+function fmtBytes(n){if(n>=1048576)return(n/1048576).toFixed(1)+' MB';if(n>=1024)return(n/1024).toFixed(1)+' kB';return n+' B'}
+function fmtAge(n){return n>=9999?'never':n+' s'}
+function fmtUp(s){const h=Math.floor(s/3600),m=Math.floor(s%3600/60);return h?h+'h '+m+'m':m?m+'m '+s%60+'s':s+'s'}
+function qualityClass(value,good,warn){return value<=good?'ok':value<=warn?'warn':'bad'}
+function updateSatellites(group){
+  const sats=(group.items||[]).filter(s=>s.el>=0&&s.az>=0);
+  document.getElementById('sat-age').textContent='age '+fmtAge(group.ageSec);
+  if(!chartsAvailable)return;
+  const grouped={}; sats.forEach(s=>(grouped[s.g]??=[]).push({x:s.az,y:90-s.el,name:(GNSS[s.g]||'G'+s.g)+' '+s.id,cno:s.cno,used:s.used,marker:{radius:s.used?6:4,lineWidth:s.used?2:1,lineColor:s.health===2?'#f85149':COLORS[s.g],fillColor:s.used?COLORS[s.g]:'transparent'}}));
+  GNSS_IDS.forEach(g=>skyChart.get('gnss-'+g).setData(grouped[g]||[],false,false,false));skyChart.redraw(false);
+  const sorted=[...sats].sort((a,b)=>b.cno-a.cno);cnoChart.xAxis[0].setCategories(sorted.map(s=>(GNSS[s.g]||'G'+s.g)+' '+s.id),false);cnoChart.series[0].setData(sorted.map(s=>({y:s.cno,color:COLORS[s.g]})),true,false,false);
+}
+function updateSurvey(d){
+  const acquiring=d.state==='ACQUIRING',active=d.state==='SURVEY_IN';document.getElementById('survey-card').classList.toggle('hidden',!d.svIn.show);
+  document.getElementById('survey-title').textContent=acquiring?'GNSS stabilization':active?'Survey-In convergence':'Completed Survey-In';
+  document.getElementById('survey-note').textContent=acquiring?'Waiting for '+d.svIn.stableTarget+' continuous seconds of a stable 3D solution before collecting the base position.':active?'This is the receiver’s estimated position uncertainty; lower is better. Early samples may rise while the estimate becomes realistic.':'Final Survey-In result (shown briefly after completion).';
+  document.getElementById('sv-time').textContent=acquiring?'not started':d.svIn.time+' s';document.getElementById('sv-acc').textContent=acquiring?'—':d.svIn.acc.toFixed(3)+' m';document.getElementById('sv-time-target').textContent='>= '+d.config.surveyTime+' s';document.getElementById('sv-acc-target').textContent='<= '+d.config.surveyAcc.toFixed(3)+' m';
+  document.getElementById('sv-acc').className='value '+(!acquiring&&d.svIn.acc<=d.config.surveyAcc?'ok':acquiring?'muted':'warn');const pct=acquiring?Math.min(100,d.svIn.stableSec/d.svIn.stableTarget*100):Math.min(100,d.svIn.time/d.config.surveyTime*100);document.getElementById('sv-progress-label').textContent=acquiring?'Stable GNSS requirement':'Survey time requirement';document.getElementById('sv-time-pct').textContent=acquiring?d.svIn.stableSec+' / '+d.svIn.stableTarget+' s':Math.round(pct)+'%';document.getElementById('sv-time-bar').style.width=pct+'%';
+  if(chartsAvailable){const h=d.svIn.history||[],start=Math.max(0,d.svIn.time-h.length+1);surveyChart.series[0].setData(h.map((v,i)=>[start+i,v]),false);surveyChart.series[1].setData(h.length?[[start,d.config.surveyAcc],[d.svIn.time,d.config.surveyAcc]]:[],true)}
+}
+document.getElementById('survey-target-form').addEventListener('submit',e=>{const active=document.getElementById('state').textContent==='SURVEY-IN';if(active&&!confirm('Changing the target will restart the active Survey-In. Continue?'))e.preventDefault()});
+function updateBaseMap(p){
+  const note=document.getElementById('map-note');
+  if(!p.saved){if(baseMap&&baseMarker){baseMap.removeLayer(baseMarker);baseMarker=null}if(baseMap&&uncertaintyCircle){baseMap.removeLayer(uncertaintyCircle);uncertaintyCircle=null}lastMapLat=lastMapLon=undefined;note.textContent='Map becomes available when a base position is saved.';return}
+  if(!mapsAvailable){note.textContent='Map library unavailable. The browser needs internet access to load Leaflet and map tiles.';note.className='map-note warn';return}
+  const ll=[p.lat,p.lon],radius=Math.max(.05,p.surveyAccMm/1000);
+  if(!baseMap){
+    baseMap=L.map('base-map',{zoomControl:true,maxZoom:22}).setView(ll,20);
+    const esri=L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',{maxNativeZoom:20,maxZoom:22,attribution:'Tiles &copy; Esri &mdash; Source: Esri, Vantor, Earthstar Geographics, and the GIS User Community'});
+    const osm=L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png',{maxNativeZoom:19,maxZoom:22,attribution:'&copy; OpenStreetMap contributors'});
+    esri.addTo(baseMap);L.control.layers({'Esri World Imagery':esri,'OpenStreetMap':osm},null,{collapsed:false}).addTo(baseMap);
+    let tileErrors=0;esri.on('tileerror',()=>{if(++tileErrors===3){esriTileFailed=true;note.textContent='Esri imagery could not be loaded anonymously. Select OpenStreetMap or configure an Esri API key.';note.className='map-note warn'}});
+  }
+  const popup=`<b>RTK base</b><br>${p.lat.toFixed(9)}&deg;<br>${p.lon.toFixed(9)}&deg;<br>Ellipsoid altitude: ${p.altEllipsoid.toFixed(4)} m<br>Survey uncertainty: ${p.surveyAccMm} mm`;
+  if(!baseMarker)baseMarker=L.marker(ll).addTo(baseMap);else baseMarker.setLatLng(ll);baseMarker.bindPopup(popup);
+  if(!uncertaintyCircle)uncertaintyCircle=L.circle(ll,{radius,color:'#f85149',weight:2,fillColor:'#f85149',fillOpacity:.16}).addTo(baseMap);else uncertaintyCircle.setLatLng(ll).setRadius(radius);
+  if(lastMapLat!==p.lat||lastMapLon!==p.lon)baseMap.setView(ll,20);lastMapLat=p.lat;lastMapLon=p.lon;if(!esriTileFailed){note.textContent='Esri World Imagery — red circle shows the reported Survey-In uncertainty ('+p.surveyAccMm+' mm).';note.className='map-note muted'}setTimeout(()=>baseMap.invalidateSize(false),0);
+}
+async function update(){try{
+  const r=await fetch('/api/status',{cache:'no-store'});if(!r.ok)throw Error('HTTP '+r.status);const d=await r.json();
+  const relay=d.state==='RELAY',acquiring=d.state==='ACQUIRING',state=document.getElementById('state');state.textContent=relay?'RELAYING RTCM3':acquiring?'STABILIZING':'SURVEY-IN';state.className='badge '+(relay?'bg-ok':'bg-warn');document.getElementById('uptime').textContent='up '+fmtUp(d.uptime);updateSurvey(d);const targetInput=document.getElementById('survey-target-mm');if(document.activeElement!==targetInput)targetInput.value=d.config.surveyTargetMm;document.getElementById('survey-target-note').textContent=relay?'Saved changes apply on the next re-survey.':d.state==='SURVEY_IN'?'Applying a change restarts Survey-In.':'This target will be used when Survey-In starts.';
+  document.getElementById('frames').textContent=d.rtcm.frames.toLocaleString();document.getElementById('bytes').textContent=fmtBytes(d.rtcm.bytes);document.getElementById('rate').textContent=d.rtcm.fps.toFixed(1)+' fps / '+fmtBytes(Math.round(d.rtcm.bps))+'/s';const ageEl=document.getElementById('rtcm-age');ageEl.textContent=fmtAge(d.rtcm.ageSec);ageEl.className='small-value '+qualityClass(d.rtcm.ageSec,2,5);
+  updateSatellites(d.satellites);
+  document.getElementById('rtcm-types').innerHTML=Object.entries(d.rtcm.types).map(([type,v])=>`<tr><td><b>${type}</b></td><td class="muted">${RTCM_DESC[type]||'Unknown'}</td><td>${v.count.toLocaleString()}</td><td class="${qualityClass(v.ageSec,2,10)}">${fmtAge(v.ageSec)}</td></tr>`).join('');
+  document.getElementById('sv-used').textContent=d.gnss.sv;document.getElementById('fix').textContent=FIX[d.gnss.fix]||d.gnss.fix;const pd=document.getElementById('pdop');pd.textContent=d.gnss.qualityLive&&d.gnss.pdop<50?d.gnss.pdop.toFixed(2):'N/A';pd.className=d.gnss.qualityLive&&d.gnss.pdop<50?qualityClass(d.gnss.pdop,1.5,2.5):'muted';document.getElementById('hacc').textContent=d.gnss.hAcc.toFixed(3)+' m';document.getElementById('module').textContent=d.gnss.module;document.getElementById('fw').textContent=d.gnss.firmware+' / '+d.gnss.protocol;
+  const p=d.pos;document.getElementById('profile').innerHTML=p.saved?`<div class="ok"><b>Saved high-precision profile active</b></div><table><tr><td>Latitude</td><td>${p.lat.toFixed(9)} deg</td></tr><tr><td>Longitude</td><td>${p.lon.toFixed(9)} deg</td></tr><tr><td>Ellipsoid altitude</td><td>${p.altEllipsoid.toFixed(4)} m</td></tr><tr><td>Survey duration</td><td>${p.surveySec} s</td></tr><tr><td>Survey uncertainty</td><td>${p.surveyAccMm} mm</td></tr></table><form method="post" action="/api/resurvey" onsubmit="return confirm('Are you sure you want to clear the saved base position and start a new Survey-In?')"><button class="button" type="submit">Clear profile and re-survey</button></form>`:'<div class="warn"><b>No saved profile. Survey-In is active.</b></div>';updateBaseMap(p);
+  document.getElementById('wifi').textContent=d.system.wifiConnected?d.system.wifiRssi+' dBm':'offline';document.getElementById('ip').textContent=d.system.ip;document.getElementById('heap').textContent=fmtBytes(d.system.heap)+' / '+fmtBytes(d.system.minHeap);document.getElementById('psram').textContent=fmtBytes(d.system.psramFree);document.getElementById('report-status').textContent=d.system.reportEnabled?d.system.reportSamples.toLocaleString()+' / '+d.system.reportCapacity.toLocaleString()+' samples recorded ('+fmtUp(d.system.reportSamples)+', one-second resolution)':'PSRAM recorder unavailable';const crc=document.getElementById('crc');crc.textContent=d.rtcm.crcErrors;crc.className=d.rtcm.crcErrors?'bad':'ok';document.getElementById('length-errors').textContent=d.rtcm.lengthErrors;document.getElementById('tx-free').textContent=d.rtcm.txFree+' bytes';document.getElementById('build').textContent=d.system.build;document.getElementById('updated').textContent='Last update '+new Date().toLocaleTimeString();
+}catch(e){document.getElementById('updated').textContent='Connection error: '+e.message}}
+initCharts();update();setInterval(update,2000);
+</script></body></html>
