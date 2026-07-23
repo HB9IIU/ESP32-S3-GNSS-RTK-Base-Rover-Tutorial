@@ -35,6 +35,7 @@
 #ifdef RGB_LED_PIN
 #include <Adafruit_NeoPixel.h>
 #endif
+#include "myconfig.h"   // WIFI_SSID, WIFI_PASS, ROVER_OTA_PASSWORD — copy from myconfig.h.example
 
 // =============================================================================
 // PIN DEFINITIONS  —  defaults for Heltec V4; override via build_flags for S3
@@ -139,11 +140,9 @@ static void ledBootShow() {
 // =============================================================================
 // WiFi
 // =============================================================================
-#define WIFI_SSID      "MESH"
-#define WIFI_PASS      "REDACTED-WIFI-PASSWORD"
 #define WIFI_HOSTNAME  "rtk-rover-tele"     // http://rtk-rover-tele.local
 #define WIFI_TIMEOUT_S  15
-#define OTA_PASSWORD   "REDACTED-ROVER-OTA-PASSWORD"
+#define OTA_PASSWORD   ROVER_OTA_PASSWORD
 
 // =============================================================================
 // RTCM3 FRAMING  (for stats / logging only — forwarding is byte-by-byte)

@@ -21,6 +21,7 @@
 #ifdef RGB_LED_PIN
 #include <Adafruit_NeoPixel.h>
 #endif
+#include "myconfig.h"   // WIFI_SSID, WIFI_PASS, BASE_OTA_PASSWORD — copy from myconfig.h.example
 
 // Generic defaults. PlatformIO build flags can override these for another
 // ESP32-S3 carrier without changing the application source.
@@ -50,12 +51,10 @@
 #define SVIN_PLOT_MIN_TIME_S 15
 #define SVIN_RESULT_HOLD_S 15
 
-#define WIFI_SSID        "MESH"
-#define WIFI_PASS        "REDACTED-WIFI-PASSWORD"
 #define WIFI_HOSTNAME    "rtk-base-tele"
 #define WIFI_TIMEOUT_S   20
 #define WIFI_RETRY_S     60
-#define OTA_PASSWORD     "REDACTED-BASE-OTA-PASSWORD"
+#define OTA_PASSWORD     BASE_OTA_PASSWORD
 
 #define RTCM_PREAMBLE    0xD3
 #define RTCM_MAX_FRAME   1029

@@ -1,0 +1,13 @@
+// =============================================================================
+// myconfig.h.example — template for local secrets
+//
+// Copy this file to myconfig.h (same folder) and fill in your own values.
+// myconfig.h is gitignored and will never be committed.
+// =============================================================================
+#pragma once
+
+#define WIFI_SSID        "your-wifi-ssid"
+#define WIFI_PASS        "your-wifi-password"
+
+#define BASE_OTA_PASSWORD  "choose-a-base-ota-password"
+#define ROVER_OTA_PASSWORD "choose-a-rover-ota-password"
