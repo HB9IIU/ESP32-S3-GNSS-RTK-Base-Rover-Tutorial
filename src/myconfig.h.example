@@ -11,3 +11,4 @@
 
 #define BASE_OTA_PASSWORD  "choose-a-base-ota-password"
 #define ROVER_OTA_PASSWORD "choose-a-rover-ota-password"
+#define LC29H_OTA_PASSWORD "choose-a-lc29h-rover-ota-password"

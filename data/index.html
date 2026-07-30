@@ -11,15 +11,24 @@
   <style>
     :root{color-scheme:dark;--bg:#0d1117;--panel:#161b22;--head:#21262d;--line:#30363d;--text:#c9d1d9;--muted:#8b949e;--green:#3fb950;--amber:#d29922;--red:#f85149;--blue:#58a6ff;--cyan:#39c5cf}
     *{box-sizing:border-box} body{margin:0;background:var(--bg);color:var(--text);font:14px system-ui,-apple-system,Segoe UI,sans-serif}
-    main{max-width:1080px;margin:auto;padding:20px}.header{display:flex;justify-content:space-between;align-items:center;gap:14px;margin-bottom:16px}.title{font-size:24px;font-weight:750}.badge{padding:9px 14px;border-radius:7px;font-weight:750}.ok{color:var(--green)}.warn{color:var(--amber)}.bad{color:var(--red)}.bg-ok{background:#1a7f4b}.bg-warn{background:#7a5700}.muted{color:var(--muted)}
+    main{max-width:1080px;margin:auto;padding:20px}.header{display:flex;justify-content:space-between;align-items:center;gap:14px;margin-bottom:16px}.header-status,.header-actions{display:flex;align-items:center;gap:8px}.header-right{display:flex;align-items:center;justify-content:flex-end;gap:12px;flex-wrap:wrap}.title{font-size:24px;font-weight:750}.badge{padding:9px 14px;border-radius:7px;font-weight:750}.header-button{display:inline-block;border:1px solid var(--line);background:var(--head);color:var(--text);padding:8px 11px;border-radius:5px;font:inherit;font-weight:650;line-height:1.2;text-decoration:none;cursor:pointer}.header-button:hover{border-color:var(--blue);background:#12243b}.reboot-button{border-color:var(--red);color:var(--red);background:transparent}.reboot-button:hover{border-color:var(--red);background:#3b171b}.reboot-button:disabled{cursor:wait;opacity:.65}.ok{color:var(--green)}.warn{color:var(--amber)}.bad{color:var(--red)}.bg-ok{background:#1a7f4b}.bg-warn{background:#7a5700}.muted{color:var(--muted)}
     .grid{display:grid;grid-template-columns:repeat(12,1fr);gap:12px}.span-12{grid-column:span 12}.span-8{grid-column:span 8}.span-7{grid-column:span 7}.span-6{grid-column:span 6}.span-5{grid-column:span 5}.span-4{grid-column:span 4}
     .card{background:var(--panel);border:1px solid var(--line);border-radius:7px;overflow:hidden}.card h2{font-size:14px;margin:0;padding:11px 14px;background:var(--head);border-bottom:1px solid var(--line)}.body{padding:14px}.metrics{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;text-align:center}.label{text-transform:uppercase;color:var(--muted);font-size:11px;letter-spacing:.07em}.value{font-size:24px;font-weight:750;margin-top:4px}.small-value{font-size:16px;font-weight:700;margin-top:6px}.report-button{display:inline-block;border:1px solid var(--blue);color:var(--blue);padding:8px 11px;border-radius:5px;text-decoration:none}.report-button:hover{background:#12243b}
     table{width:100%;border-collapse:collapse}td,th{padding:7px 8px;border-bottom:1px solid var(--line);text-align:left}td:last-child,th:last-child{text-align:right}.progress{height:7px;background:#252b33;border-radius:4px;overflow:hidden}.bar{height:100%;background:var(--blue);width:0}.rowline{display:flex;justify-content:space-between;margin:8px 0 5px}.hidden{display:none}.chart{height:350px}.chart-short{height:300px}.map{height:520px;background:#0d1117}.map-note{padding:9px 14px;border-bottom:1px solid var(--line)}.footer{text-align:center;color:var(--muted);font-size:12px;margin:16px}.button{border:1px solid var(--red);background:transparent;color:var(--red);padding:7px 10px;border-radius:5px;cursor:pointer}.button:hover{background:#3b171b}.config-button{border-color:var(--blue);color:var(--blue)}.config-button:hover{background:#12243b}.number-input{width:130px;background:#0d1117;color:var(--text);border:1px solid var(--line);border-radius:5px;padding:8px}.pill{display:inline-block;border:1px solid var(--line);padding:2px 6px;border-radius:10px;font-size:11px;margin-left:5px}.leaflet-control-layers,.leaflet-popup-content-wrapper,.leaflet-popup-tip{background:#21262d;color:var(--text)}
-    @media(max-width:780px){.span-8,.span-7,.span-6,.span-5,.span-4{grid-column:span 12}.metrics{grid-template-columns:repeat(2,1fr)}.title{font-size:19px}.chart{height:310px}}
+    @media(max-width:780px){.header{align-items:flex-start}.header-right{justify-content:flex-end}.header-status{width:100%;justify-content:flex-end}.span-8,.span-7,.span-6,.span-5,.span-4{grid-column:span 12}.metrics{grid-template-columns:repeat(2,1fr)}.title{font-size:19px}.chart{height:310px}}
   </style>
 </head>
 <body><main>
-  <div class="header"><div class="title">RTK Base Station</div><div><span id="state" class="badge">CONNECTING</span> <span id="uptime" class="muted"></span></div></div>
+  <div class="header">
+    <div class="title">RTK Base Station</div>
+    <div class="header-right">
+      <div class="header-actions">
+        <a class="header-button" href="http://rtk-rover-tele.local/" target="_blank" rel="noopener">Open rover</a>
+        <button class="header-button reboot-button" id="reboot-base" type="button">Reboot base</button>
+      </div>
+      <div class="header-status"><span id="state" class="badge">CONNECTING</span><span id="uptime" class="muted"></span></div>
+    </div>
+  </div>
 
   <div class="grid">
     <section id="survey-card" class="card span-12 hidden"><h2 id="survey-title">Survey-In convergence</h2><div class="body">
@@ -111,6 +120,12 @@ function updateSurvey(d){
   if(chartsAvailable){const h=d.svIn.history||[],start=Math.max(0,d.svIn.time-h.length+1);surveyChart.series[0].setData(h.map((v,i)=>[start+i,v]),false);surveyChart.series[1].setData(h.length?[[start,d.config.surveyAcc],[d.svIn.time,d.config.surveyAcc]]:[],true)}
 }
 document.getElementById('survey-target-form').addEventListener('submit',e=>{const active=document.getElementById('state').textContent==='SURVEY-IN';if(active&&!confirm('Changing the target will restart the active Survey-In. Continue?'))e.preventDefault()});
+document.getElementById('reboot-base').addEventListener('click',async e=>{
+  if(!confirm('Reboot the RTK base station now? RTCM relay will be interrupted briefly.'))return;
+  const button=e.currentTarget;button.disabled=true;button.textContent='Rebooting...';
+  try{const response=await fetch('/api/reboot',{method:'POST'});if(!response.ok)throw Error('HTTP '+response.status);document.getElementById('updated').textContent='Base is rebooting. Reconnecting...'}
+  catch(error){button.disabled=false;button.textContent='Reboot base';document.getElementById('updated').textContent='Reboot request failed: '+error.message}
+});
 function updateBaseMap(p){
   const note=document.getElementById('map-note');
   if(!p.saved){if(baseMap&&baseMarker){baseMap.removeLayer(baseMarker);baseMarker=null}if(baseMap&&uncertaintyCircle){baseMap.removeLayer(uncertaintyCircle);uncertaintyCircle=null}lastMapLat=lastMapLon=undefined;note.textContent='Map becomes available when a base position is saved.';return}

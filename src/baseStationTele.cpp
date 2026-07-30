@@ -18,6 +18,7 @@
 #include <ArduinoOTA.h>
 #include <LittleFS.h>
 #include <esp_heap_caps.h>
+#include <esp_now.h>
 #ifdef RGB_LED_PIN
 #include <Adafruit_NeoPixel.h>
 #endif
@@ -76,6 +77,8 @@ static bool networkReady = false;
 static bool wifiAttempting = false;
 static uint32_t wifiAttemptStartedMs = 0;
 static uint32_t lastWifiAttemptMs = 0;
+static bool rebootRequested = false;
+static uint32_t rebootAtMs = 0;
 
 #ifdef RGB_LED_PIN
 static Adafruit_NeoPixel rgbLed(1, RGB_LED_PIN, NEO_GRB + NEO_KHZ800);
@@ -217,6 +220,18 @@ static uint32_t lastRtcmMs = 0;
 static float rtcmFramesPerSec = 0.0f;
 static float rtcmBytesPerSec = 0.0f;
 
+// ESP-NOW broadcast — a second, independent RTCM output path alongside the
+// 3DR/Tele_Serial radio, for rovers that don't have a 3DR radio (e.g. the
+// LC29H(EA) rover). Same validated bytes, chunked to fit ESP-NOW's per-packet
+// limit; the receiving parser doesn't care where chunk boundaries fall.
+// Broadcast (not paired to a specific MAC) so additional ESP-NOW rovers can
+// be added later without touching this file.
+#define ESPNOW_CHUNK_SIZE 200
+static const uint8_t ESPNOW_BROADCAST_ADDR[6] = {0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF};
+static bool espNowReady = false;
+static uint32_t espNowBytesSent = 0;
+static uint32_t espNowSendErrors = 0;
+
 static String gnssModule = "unknown";
 static String gnssFirmware = "unknown";
 static String gnssProtocol = "unknown";
@@ -324,6 +339,45 @@ static void resetRtcmParser() {
     rtcmExpected = -1;
 }
 
+// Fire-and-forget: chunk the validated RTCM bytes into <=ESPNOW_CHUNK_SIZE
+// pieces and broadcast each over ESP-NOW. This is independent of the
+// Tele_Serial/3DR path — a send failure here never touches the radio relay.
+static void sendRtcmOverEspNow(const uint8_t *data, size_t len) {
+    if (!espNowReady) return;
+    size_t offset = 0;
+    while (offset < len) {
+        size_t chunkLen = min((size_t)ESPNOW_CHUNK_SIZE, len - offset);
+        esp_err_t result = esp_now_send(ESPNOW_BROADCAST_ADDR, data + offset, chunkLen);
+        if (result == ESP_OK) {
+            espNowBytesSent += chunkLen;
+        } else {
+            espNowSendErrors++;
+        }
+        offset += chunkLen;
+    }
+}
+
+static void beginEspNow() {
+    // Requires WiFi.mode(WIFI_STA) to already be set (done in
+    // beginWifiAttempt(), called just before this in setup()). ESP-NOW rides
+    // on whatever channel the WiFi radio ends up using, so any ESP-NOW rover
+    // must join the same WiFi network to land on the same channel.
+    if (esp_now_init() != ESP_OK) {
+        Serial.println(F("[ESP-NOW] Init failed; LC29H-style rovers won't receive corrections"));
+        return;
+    }
+    esp_now_peer_info_t peer = {};
+    memcpy(peer.peer_addr, ESPNOW_BROADCAST_ADDR, 6);
+    peer.channel = 0;   // 0 = use whatever channel the WiFi radio is already on
+    peer.encrypt = false;
+    if (esp_now_add_peer(&peer) != ESP_OK) {
+        Serial.println(F("[ESP-NOW] Failed to add broadcast peer"));
+        return;
+    }
+    espNowReady = true;
+    Serial.println(F("[ESP-NOW] Ready, broadcasting RTCM corrections"));
+}
+
 static void processRTCMByte(uint8_t b) {
     if (rtcmExpected == -1) {
         if (b != RTCM_PREAMBLE) return;
@@ -363,6 +417,7 @@ static void processRTCMByte(uint8_t b) {
             // sent to a rover. Parse and discard it until fixed mode is active.
             if (baseState == RELAY) {
                 Tele_Serial.write(rtcmBuf, rtcmIdx);
+                sendRtcmOverEspNow(rtcmBuf, rtcmIdx);
                 rtcmFramesSent++;
                 rtcmBytesSent += rtcmIdx;
                 lastRtcmMs = millis();
@@ -773,6 +828,11 @@ static void handleApiStatus() {
     }
     j += F("}}");
 
+    j += F(",\"espNow\":{\"ready\":"); j += espNowReady ? F("true") : F("false");
+    j += F(",\"bytesSent\":"); j += espNowBytesSent;
+    j += F(",\"sendErrors\":"); j += espNowSendErrors;
+    j += F("}");
+
     double lat = savedLat / 1e7 + savedLatHp / 1e9;
     double lon = savedLon / 1e7 + savedLonHp / 1e9;
     double alt = savedAltCm / 100.0 + savedAltHp / 10000.0;
@@ -854,6 +914,17 @@ static void startNetworkServices() {
         clearBaseProfileAndSurvey();
         webServer.sendHeader(F("Location"), F("/"));
         webServer.send(303);
+    });
+    webServer.on("/api/reboot", HTTP_POST, []() {
+        if (rebootRequested) {
+            webServer.send(409, F("text/plain"), F("Reboot already scheduled"));
+            return;
+        }
+        rebootRequested = true;
+        rebootAtMs = millis() + 500;
+        webServer.sendHeader(F("Cache-Control"), F("no-store"));
+        webServer.send(202, F("text/plain"), F("Reboot scheduled"));
+        Serial.println(F("[WEB] Base reboot requested"));
     });
     webServer.begin();
 
@@ -952,11 +1023,17 @@ void setup() {
         Serial.println(F("[GNSS] Not responding; background retry enabled"));
     }
     beginWifiAttempt();
+    beginEspNow();
 }
 
 void loop() {
     serviceNetwork();
     serviceStatusLed();
+    if (rebootRequested && (int32_t)(millis() - rebootAtMs) >= 0) {
+        Serial.println(F("[WEB] Rebooting base"));
+        Serial.flush();
+        ESP.restart();
+    }
 
     if (!gnssReady) {
         static uint32_t lastRetryMs = 0;

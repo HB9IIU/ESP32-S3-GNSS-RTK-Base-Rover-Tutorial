@@ -1,0 +1,19 @@
+; =============================================================================
+; platformio_local.ini.example — template for local OTA passwords
+;
+; Copy this file to platformio_local.ini (same folder) and fill in the same
+; passwords you set in src/myconfig.h. platformio_local.ini is gitignored and
+; will never be committed. PlatformIO loads it automatically (see
+; extra_configs in platformio.ini) and its upload_flags override the
+; placeholder ones in each *-ota environment -- no env vars to export, no
+; steps to remember before uploading.
+; =============================================================================
+
+[env:base-ota]
+upload_flags = --auth=choose-a-base-ota-password
+
+[env:rover-ota]
+upload_flags = --auth=choose-a-rover-ota-password
+
+[env:lc29h-rover-ota]
+upload_flags = --auth=choose-a-lc29h-rover-ota-password

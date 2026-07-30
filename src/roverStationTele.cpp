@@ -163,6 +163,8 @@ WebServer webServer(80);
 // =============================================================================
 static bool     gnssReady          = false;
 static bool     wifiReady          = false;
+static bool     rebootRequested    = false;
+static uint32_t rebootAtMs         = 0;
 static uint32_t rtcmPktsReceived   = 0;
 static uint32_t rtcmBytesReceived  = 0;
 static uint32_t lastTeleMs         = 0;   // millis() of last byte received
@@ -748,6 +750,17 @@ static void wifiSetup() {
         webServer.send(accepted ? 200 : 409, F("application/json"),
                        accepted ? F("{\"ok\":true}") : F("{\"ok\":false,\"error\":\"RTK FIXED with fresh corrections required\"}"));
     });
+    webServer.on("/api/reboot", HTTP_POST, []() {
+        if (rebootRequested) {
+            webServer.send(409, F("text/plain"), F("Reboot already scheduled"));
+            return;
+        }
+        rebootRequested = true;
+        rebootAtMs = millis() + 500;
+        webServer.sendHeader(F("Cache-Control"), F("no-store"));
+        webServer.send(202, F("text/plain"), F("Reboot scheduled"));
+        Serial.println(F("[WEB] Rover reboot requested"));
+    });
     webServer.on("/api/track/info",           handleTrackInfo);
     webServer.on("/api/track/points",         handleTrackPoints);
     webServer.on("/api/track/waypoints",      handleTrackWaypoints);
@@ -859,6 +872,13 @@ void setup() {
 // =============================================================================
 void loop() {
     serviceReferenceButton();
+    if (wifiReady) { webServer.handleClient(); ArduinoOTA.handle(); }
+    if (rebootRequested && (int32_t)(millis() - rebootAtMs) >= 0) {
+        Serial.println(F("[WEB] Rebooting rover"));
+        Serial.flush();
+        ESP.restart();
+    }
+
     if (!gnssReady) {
         static unsigned long lastRetry = 0;
         if (millis() - lastRetry > 3000) {
@@ -875,7 +895,6 @@ void loop() {
         return;
     }
 
-    if (wifiReady) { webServer.handleClient(); ArduinoOTA.handle(); }
 #ifdef RGB_LED_PIN
     ledUpdate();
 #endif

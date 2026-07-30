@@ -3,45 +3,46 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
-  <title>RTK Rover</title>
+  <title>RTK Rover (LC29H)</title>
   <link rel="stylesheet" href="/vendor/leaflet/leaflet.css">
   <script src="/vendor/highcharts/highcharts.js"></script>
   <script src="/vendor/leaflet/leaflet.js"></script>
   <style>
     :root{color-scheme:dark;--bg:#0d1117;--panel:#161b22;--head:#21262d;--line:#30363d;--text:#c9d1d9;--muted:#8b949e;--green:#3fb950;--amber:#d29922;--red:#f85149;--blue:#58a6ff;--cyan:#39c5cf}
     *{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--text);font:14px system-ui,-apple-system,Segoe UI,sans-serif}main{max-width:1080px;margin:auto;padding:20px}
-    .header{display:flex;justify-content:space-between;align-items:center;gap:14px;margin-bottom:16px}.header-status,.header-actions{display:flex;align-items:center;gap:8px}.header-right{display:flex;align-items:center;justify-content:flex-end;gap:12px;flex-wrap:wrap}.title{font-size:24px;font-weight:750}.badge{display:inline-block;padding:10px 15px;border:1px solid;border-radius:7px;font-size:17px;font-weight:750}.header-button{display:inline-block;border:1px solid var(--line);background:var(--head);color:var(--text);padding:8px 11px;border-radius:5px;font:inherit;font-weight:650;line-height:1.2;text-decoration:none;cursor:pointer}.header-button:hover{border-color:var(--blue);background:#12243b}.reboot-button{border-color:var(--red);color:var(--red);background:transparent}.reboot-button:hover{border-color:var(--red);background:#3b171b}.reboot-button:disabled{cursor:wait;opacity:.65}.fix-fixed{color:var(--green);background:#153b25;border-color:var(--green)}.fix-float{color:var(--amber);background:#3d2f00;border-color:var(--amber)}.fix-basic{color:var(--red);background:#3d1c1c;border-color:var(--red)}
+    .header{display:flex;justify-content:space-between;align-items:center;gap:14px;margin-bottom:16px}.title{font-size:24px;font-weight:750}.badge{display:inline-block;padding:10px 15px;border:1px solid;border-radius:7px;font-size:17px;font-weight:750}.fix-fixed{color:var(--green);background:#153b25;border-color:var(--green)}.fix-float{color:var(--amber);background:#3d2f00;border-color:var(--amber)}.fix-basic{color:var(--red);background:#3d1c1c;border-color:var(--red)}
     .grid{display:grid;grid-template-columns:repeat(12,1fr);gap:12px}.span-12{grid-column:span 12}.span-8{grid-column:span 8}.span-7{grid-column:span 7}.span-6{grid-column:span 6}.span-5{grid-column:span 5}.span-4{grid-column:span 4}
     .card{background:var(--panel);border:1px solid var(--line);border-radius:7px;overflow:hidden}.card h2{font-size:14px;margin:0;padding:11px 14px;background:var(--head);border-bottom:1px solid var(--line)}.body{padding:14px}.metrics{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;text-align:center}.label{text-transform:uppercase;color:var(--muted);font-size:11px;letter-spacing:.07em}.value{font-size:24px;font-weight:750;margin-top:4px}.small-value{font-size:16px;font-weight:700;margin-top:6px}.ok{color:var(--green)}.warn{color:var(--amber)}.bad{color:var(--red)}.muted{color:var(--muted)}
     table{width:100%;border-collapse:collapse}td,th{padding:8px;border-bottom:1px solid var(--line);text-align:left}td:last-child,th:last-child{text-align:right}.chart{height:350px}.chart-short{height:300px}.map{height:350px;background:#0d1117}.note{padding:9px 14px;border-bottom:1px solid var(--line);color:var(--muted);font-size:12px}.pill{display:inline-block;border:1px solid var(--line);padding:2px 7px;border-radius:10px;font-size:11px;margin-left:5px}.button{border:1px solid var(--blue);background:transparent;color:var(--blue);padding:8px 12px;border-radius:5px;cursor:pointer;font-weight:650}.button:hover{background:#12243a}.footer{text-align:center;color:var(--muted);font-size:12px;margin:16px}.leaflet-control-layers,.leaflet-popup-content-wrapper,.leaflet-popup-tip{background:#21262d;color:var(--text)}
-    @media(max-width:780px){.header{align-items:flex-start}.header-right{justify-content:flex-end}.header-status{width:100%;justify-content:flex-end}.span-8,.span-7,.span-6,.span-5,.span-4{grid-column:span 12}.metrics{grid-template-columns:repeat(2,1fr)}.title{font-size:19px}.chart,.map{height:310px}}
+    @media(max-width:780px){.span-8,.span-7,.span-6,.span-5,.span-4{grid-column:span 12}.metrics{grid-template-columns:repeat(2,1fr)}.title{font-size:19px}.chart,.map{height:310px}}
   </style>
 </head>
 <body><main>
-  <div class="header">
-    <div class="title">RTK Rover</div>
-    <div class="header-right">
-      <div class="header-actions">
-        <a class="header-button" href="http://rtk-base-tele.local/" target="_blank" rel="noopener">Open base</a>
-        <button class="header-button reboot-button" id="reboot-rover" type="button">Reboot rover</button>
-      </div>
-      <div class="header-status"><span id="fix-badge" class="badge fix-basic">CONNECTING</span><span id="uptime" class="muted"></span></div>
-    </div>
-  </div>
+  <div class="header"><div class="title">RTK Rover (LC29H)</div><div><span id="fix-badge" class="badge fix-basic">CONNECTING</span> <span id="uptime" class="muted"></span> <span id="utc-time" class="muted"></span></div></div>
 
   <div class="grid">
     <section class="card span-12"><h2>Position solution</h2><div class="body"><div class="metrics">
-      <div><div class="label">Horizontal estimate</div><div id="hacc" class="value">-</div></div>
-      <div><div class="label">Vertical estimate</div><div id="vacc" class="value">-</div></div>
+      <div><div class="label">HDOP</div><div id="hdop" class="value">-</div></div>
+      <div><div class="label">PDOP</div><div id="pdop" class="value">-</div></div>
       <div><div class="label">Satellites used</div><div id="sv" class="value">-</div></div>
       <div><div class="label">Navigation fix</div><div id="fix-type" class="small-value">-</div></div>
-    </div></div></section>
+    </div><div class="note" style="border:0;padding:8px 0 0">NMEA has no true horizontal/vertical accuracy figure like u-blox UBX &mdash; HDOP/PDOP are dilution-of-precision numbers (lower is better), not millimetre estimates.</div></div></section>
 
-    <section class="card span-12"><h2>RTCM3 correction health</h2><div class="body"><div class="metrics">
+    <section class="card span-12"><h2>Satellites in view <span id="sat-count" class="pill muted">-</span></h2><div class="body" style="display:flex;gap:20px;flex-wrap:wrap">
+      <div style="flex:0 0 260px"><div id="skyplot" style="width:260px;height:260px;margin:auto"></div><div class="note" style="border:0;padding:8px 0 0;text-align:center">North up &middot; centre = zenith &middot; edge = horizon</div></div>
+      <div style="flex:1 1 320px;min-width:280px"><div id="signal-bars" style="max-height:280px;overflow-y:auto"></div></div>
+    </div></section>
+
+    <section class="card span-12"><h2>ESP-NOW correction health</h2><div class="body"><div class="metrics">
       <div><div class="label">Valid-looking frames</div><div id="packets" class="value ok">-</div></div>
       <div><div class="label">Data received</div><div id="bytes" class="value" style="color:var(--cyan)">-</div></div>
       <div><div class="label">Current rate</div><div id="rate" class="small-value">-</div></div>
       <div><div class="label">Correction link</div><div id="last-rx" class="small-value">-</div></div>
+    </div>
+    <div class="note" style="border:0;padding:12px 0 0;display:flex;align-items:center;gap:8px">
+      <span style="color:var(--muted)">GNSS interference (module-reported):</span>
+      <span id="jam-l1" class="pill muted">L1: -</span>
+      <span id="jam-l5" class="pill muted" style="display:none">L5: -</span>
     </div></div></section>
 
     <section class="card span-12"><h2>Reference displacement</h2><div class="body">
@@ -108,7 +109,7 @@
 
     <section class="card span-8"><h2>RTCM3 messages</h2><div class="body"><table><thead><tr><th>Type</th><th>Description</th><th>Count</th></tr></thead><tbody id="rtcm-table"></tbody></table></div></section>
     <section class="card span-4"><h2>Current coordinates</h2><div class="body"><table>
-      <tr><td>Latitude</td><td id="lat">-</td></tr><tr><td>Longitude</td><td id="lon">-</td></tr><tr><td>Altitude</td><td id="alt">-</td></tr><tr><td>3DR baud</td><td id="baud">-</td></tr><tr><td>Dashboard update</td><td id="updated">-</td></tr>
+      <tr><td>Latitude</td><td id="lat">-</td></tr><tr><td>Longitude</td><td id="lon">-</td></tr><tr><td>Altitude</td><td id="alt">-</td></tr><tr><td>Speed / heading</td><td id="spd">-</td></tr><tr><td>Dashboard update</td><td id="updated">-</td></tr>
     </table></div></section>
   </div>
   <div id="connection" class="footer">Connecting...</div>
@@ -116,13 +117,17 @@
 
 <script>
 const RTCM_DESC={1005:'Base antenna reference point',1074:'GPS MSM4 observations',1084:'GLONASS MSM4 observations',1094:'Galileo MSM4 observations',1124:'BeiDou MSM4 observations',1230:'GLONASS code-phase biases'};
-const FIX_TYPE={0:'No fix',1:'Dead reckoning',2:'2D',3:'3D',4:'GNSS + DR',5:'TIME'};
+const FIX_TYPE={0:'No fix',1:'GPS',2:'DGPS',4:'RTK Fixed',5:'RTK Float'};
+const SYS_NAME={P:'GPS',L:'GLONASS',A:'Galileo',B:'BeiDou',Q:'QZSS',I:'NavIC'};
+const SYS_COLOR={P:'#58a6ff',L:'#f85149',A:'#3fb950',B:'#d29922',Q:'#bc8cff',I:'#39c5cf'};
+const JAM_LABEL={0:'Unknown',1:'Good',2:'Warning',3:'Critical'};
+const JAM_CLASS={0:'muted',1:'ok',2:'warn',3:'bad'};
 const chartsAvailable=typeof Highcharts!=='undefined',mapsAvailable=typeof L!=='undefined';
-let scatterChart,referenceChart,verticalChart,roverMap,roverMarker,referenceMarker,accuracyCircle,trailLine,displacementLine,lastMapLat,lastMapLon,esriTileFailed=false,previousTele,lastReferenceSession=null;
+let scatterChart,referenceChart,verticalChart,roverMap,roverMarker,referenceMarker,accuracyCircle,trailLine,displacementLine,lastMapLat,lastMapLon,esriTileFailed=false,previousRtcm,lastReferenceSession=null;
 
 function fmtBytes(n){if(n>=1048576)return(n/1048576).toFixed(1)+' MB';if(n>=1024)return(n/1024).toFixed(1)+' kB';return n+' B'}
 function fmtUp(s){const h=Math.floor(s/3600),m=Math.floor(s%3600/60);return h?h+'h '+m+'m':m?m+'m '+s%60+'s':s+'s'}
-function metricClass(mm,good,warn){return mm<=good?'ok':mm<=warn?'warn':'bad'}
+function dopClass(v){return v<=1.5?'ok':v<=3?'warn':'bad'}
 function rms(points){return points.length?Math.sqrt(points.reduce((sum,[e,n])=>sum+e*e+n*n,0)/points.length):0}
 
 function ensureScatter(){
@@ -158,32 +163,69 @@ function updateScatter(history){
   document.getElementById('recent-rms').textContent='Recent RMS: '+rms(points.slice(-30)).toFixed(1)+' mm';document.getElementById('all-rms').textContent='Window RMS: '+rms(points).toFixed(1)+' mm';
 }
 
+// ── Satellites in view: sky-plot + signal bars ─────────────────────────────
+function renderSkyPlot(sats){
+  const size=260,c=size/2,R=c-18;
+  let svg=`<svg viewBox="0 0 ${size} ${size}" width="${size}" height="${size}">`;
+  [30,60,90].forEach(e=>{svg+=`<circle cx="${c}" cy="${c}" r="${R*(90-e)/90}" fill="none" stroke="#30363d" stroke-width="1"/>`});
+  svg+=`<line x1="${c}" y1="${c-R}" x2="${c}" y2="${c+R}" stroke="#21262d"/><line x1="${c-R}" y1="${c}" x2="${c+R}" y2="${c}" stroke="#21262d"/>`;
+  svg+=`<text x="${c}" y="${c-R-4}" fill="#8b949e" font-size="10" text-anchor="middle">N</text>`;
+  sats.forEach(s=>{
+    const r=R*(90-s.elev)/90,rad=s.az*Math.PI/180,x=c+r*Math.sin(rad),y=c-r*Math.cos(rad),col=SYS_COLOR[s.sys]||'#8b949e';
+    const op=s.snr>0?Math.min(1,0.35+s.snr/45):0.35;
+    svg+=`<circle cx="${x}" cy="${y}" r="7" fill="${col}" fill-opacity="${op.toFixed(2)}" stroke="${col}" stroke-width="1.2"/>`;
+    svg+=`<text x="${x}" y="${y+3}" fill="#0d1117" font-size="7" text-anchor="middle" font-weight="bold">${s.prn}</text>`;
+  });
+  svg+='</svg>';
+  document.getElementById('skyplot').innerHTML=svg;
+}
+
+function renderSignalBars(sats){
+  const sorted=[...sats].sort((a,b)=>b.snr-a.snr);
+  document.getElementById('signal-bars').innerHTML=sorted.map(s=>{
+    const pct=Math.max(2,Math.min(100,s.snr/50*100)),col=SYS_COLOR[s.sys]||'#8b949e';
+    return `<div style="display:flex;align-items:center;gap:8px;margin-bottom:4px;font-size:12px">`+
+           `<span style="width:70px;color:${col};font-weight:600">${SYS_NAME[s.sys]||s.sys} ${s.prn}</span>`+
+           `<span style="flex:1;background:#0d1117;border-radius:3px;overflow:hidden;height:10px">`+
+           `<span style="display:block;height:100%;width:${pct}%;background:${col}"></span></span>`+
+           `<span style="width:34px;text-align:right;color:var(--muted)">${s.snr||'-'}</span></div>`;
+  }).join('')||'<div class="muted" style="font-size:12px">No satellites reported yet</div>';
+}
+
+async function pollSatellites(){
+  try{
+    const sats=await(await fetch('/api/satellites',{cache:'no-store'})).json();
+    document.getElementById('sat-count').textContent=sats.length+' tracked';
+    renderSkyPlot(sats);renderSignalBars(sats);
+  }catch(e){}
+}
+
 function updateMap(d){
-  const note=document.getElementById('map-note');if(d.fixType<2||!d.lat||!d.lon){note.textContent='Waiting for a valid position.';return}if(!mapsAvailable){note.textContent='Local Leaflet files are unavailable.';note.className='note bad';return}
-  const ll=[d.lat,d.lon],radius=Math.max(.05,d.hAcc),history=(d.posHist||[]).map(([la,lo])=>[la/1e7,lo/1e7]);
+  const note=document.getElementById('map-note');if(d.fixType<1||!d.lat||!d.lon){note.textContent='Waiting for a valid position.';return}if(!mapsAvailable){note.textContent='Local Leaflet files are unavailable.';note.className='note bad';return}
+  const ll=[d.lat,d.lon],radius=Math.max(.03,(d.hdop||1)*1.5),history=(d.posHist||[]).map(([la,lo])=>[la/1e7,lo/1e7]);
   if(!roverMap){roverMap=L.map('rover-map').setView(ll,19);const esri=L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',{maxZoom:20,attribution:'Tiles &copy; Esri &mdash; Source: Esri, Vantor, Earthstar Geographics, and the GIS User Community'}),osm=L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png',{maxZoom:19,attribution:'&copy; OpenStreetMap contributors'});esri.addTo(roverMap);L.control.layers({'Esri World Imagery':esri,'OpenStreetMap':osm},null,{collapsed:true}).addTo(roverMap);let errors=0;esri.on('tileerror',()=>{if(++errors===3){esriTileFailed=true;note.textContent='Esri imagery unavailable. Select OpenStreetMap.';note.className='note warn'}})}
-  const popup=`<b>${d.fix}</b><br>${d.lat.toFixed(8)}&deg;<br>${d.lon.toFixed(8)}&deg;<br>HACC: ${(d.hAcc*1000).toFixed(0)} mm`;
+  const popup=`<b>${d.fix}</b><br>${d.lat.toFixed(8)}&deg;<br>${d.lon.toFixed(8)}&deg;<br>HDOP: ${d.hdop.toFixed(2)}`;
   if(!roverMarker)roverMarker=L.marker(ll).addTo(roverMap);else roverMarker.setLatLng(ll);roverMarker.bindPopup(popup);if(!accuracyCircle)accuracyCircle=L.circle(ll,{radius,color:'#f85149',weight:2,fillOpacity:.12}).addTo(roverMap);else accuracyCircle.setLatLng(ll).setRadius(radius);if(!trailLine)trailLine=L.polyline(history,{color:'#58a6ff',weight:2,opacity:.75}).addTo(roverMap);else trailLine.setLatLngs(history);
   if(d.reference&&d.reference.set){const refll=[d.reference.lat,d.reference.lon];if(!referenceMarker)referenceMarker=L.marker(refll,{opacity:.8}).addTo(roverMap);else referenceMarker.setLatLng(refll);referenceMarker.bindPopup(`<b>Reference</b><br>${d.reference.lat.toFixed(8)}&deg;<br>${d.reference.lon.toFixed(8)}&deg;`);if(!displacementLine)displacementLine=L.polyline([refll,ll],{color:'#f85149',weight:2,dashArray:'6 5'}).addTo(roverMap);else displacementLine.setLatLngs([refll,ll])}else{if(referenceMarker){roverMap.removeLayer(referenceMarker);referenceMarker=null}if(displacementLine){roverMap.removeLayer(displacementLine);displacementLine=null}}
-  if(lastMapLat===undefined||Math.abs(lastMapLat-d.lat)>0.00005||Math.abs(lastMapLon-d.lon)>0.00005)roverMap.setView(ll,19);lastMapLat=d.lat;lastMapLon=d.lon;if(!esriTileFailed){note.textContent='Current rover position; red circle is the reported horizontal estimate.';note.className='note'}setTimeout(()=>roverMap.invalidateSize(false),0);
+  if(lastMapLat===undefined||Math.abs(lastMapLat-d.lat)>0.00005||Math.abs(lastMapLon-d.lon)>0.00005)roverMap.setView(ll,19);lastMapLat=d.lat;lastMapLon=d.lon;if(!esriTileFailed){note.textContent='Current rover position; red circle is a rough HDOP-scaled estimate, not a true accuracy figure.';note.className='note'}setTimeout(()=>roverMap.invalidateSize(false),0);
 }
 
 async function update(){try{
-  const response=await fetch('/api/status',{cache:'no-store'});if(!response.ok)throw Error('HTTP '+response.status);const d=await response.json(),now=performance.now(),badge=document.getElementById('fix-badge');badge.textContent=d.fix;badge.className='badge '+(d.carr===2?'fix-fixed':d.carr===1?'fix-float':'fix-basic');document.getElementById('uptime').textContent='up '+fmtUp(d.uptime);
-  const hMm=d.hAcc*1000,vMm=d.vAcc*1000,h=document.getElementById('hacc'),v=document.getElementById('vacc');h.textContent=hMm.toFixed(0)+' mm';h.className='value '+metricClass(hMm,30,100);v.textContent=vMm.toFixed(0)+' mm';v.className='value '+metricClass(vMm,50,150);document.getElementById('sv').textContent=d.sv;document.getElementById('sv').className='value '+(d.sv>=20?'ok':d.sv>=12?'warn':'bad');document.getElementById('fix-type').textContent=FIX_TYPE[d.fixType]||d.fixType;
-  document.getElementById('packets').textContent=d.tele.pkts.toLocaleString();document.getElementById('bytes').textContent=fmtBytes(d.tele.bytes);let rate='measuring...';if(previousTele){const seconds=(now-previousTele.time)/1000,frames=(d.tele.pkts-previousTele.frames)/seconds,bytes=(d.tele.bytes-previousTele.bytes)/seconds;rate=frames.toFixed(1)+' fps / '+fmtBytes(Math.max(0,Math.round(bytes)))+'/s'}previousTele={time:now,frames:d.tele.pkts,bytes:d.tele.bytes};document.getElementById('rate').textContent=rate;
-  const age=d.tele.ageSec,last=document.getElementById('last-rx');last.textContent=age<2?'LIVE':age<9999?age+' s old':'NEVER';last.className='small-value '+(age<2?'ok':age<5?'warn':'bad');document.getElementById('baud').textContent=d.tele.baud.toLocaleString()+' bps';
-  document.getElementById('rtcm-table').innerHTML=Object.entries(d.rtcm).map(([type,count])=>`<tr><td><b>${type}</b></td><td class="muted">${RTCM_DESC[type]||'Unknown'}</td><td>${count.toLocaleString()}</td></tr>`).join('');document.getElementById('lat').textContent=d.lat.toFixed(8)+' deg';document.getElementById('lon').textContent=d.lon.toFixed(8)+' deg';document.getElementById('alt').textContent=d.alt.toFixed(2)+' m';document.getElementById('updated').textContent=new Date().toLocaleTimeString();
+  const response=await fetch('/api/status',{cache:'no-store'});if(!response.ok)throw Error('HTTP '+response.status);const d=await response.json(),now=performance.now(),badge=document.getElementById('fix-badge');badge.textContent=d.fix;badge.className='badge '+(d.fixType===4?'fix-fixed':d.fixType===5?'fix-float':'fix-basic');document.getElementById('uptime').textContent='up '+fmtUp(d.system.uptime);
+  const hd=document.getElementById('hdop'),pd=document.getElementById('pdop');hd.textContent=d.hdop.toFixed(2);hd.className='value '+dopClass(d.hdop);pd.textContent=d.pdop.toFixed(2);pd.className='value '+dopClass(d.pdop);document.getElementById('sv').textContent=d.sv;document.getElementById('sv').className='value '+(d.sv>=20?'ok':d.sv>=12?'warn':'bad');document.getElementById('fix-type').textContent=FIX_TYPE[d.fixType]||d.fixType;
+  document.getElementById('packets').textContent=d.rtcm.frames.toLocaleString();document.getElementById('bytes').textContent=fmtBytes(d.rtcm.bytes);let rate='measuring...';if(previousRtcm){const seconds=(now-previousRtcm.time)/1000,frames=(d.rtcm.frames-previousRtcm.frames)/seconds,bytes=(d.rtcm.bytes-previousRtcm.bytes)/seconds;rate=frames.toFixed(1)+' fps / '+fmtBytes(Math.max(0,Math.round(bytes)))+'/s'}previousRtcm={time:now,frames:d.rtcm.frames,bytes:d.rtcm.bytes};document.getElementById('rate').textContent=rate;
+  const age=d.rtcm.ageSec,last=document.getElementById('last-rx');last.textContent=age<2?'LIVE':age<9999?age+' s old':'NEVER';last.className='small-value '+(age<2?'ok':age<5?'warn':'bad');
+  document.getElementById('rtcm-table').innerHTML=Object.entries(d.rtcm.types).map(([type,count])=>`<tr><td><b>${type}</b></td><td class="muted">${RTCM_DESC[type]||'Unknown'}</td><td>${count.toLocaleString()}</td></tr>`).join('');document.getElementById('lat').textContent=d.lat.toFixed(8)+' deg';document.getElementById('lon').textContent=d.lon.toFixed(8)+' deg';document.getElementById('alt').textContent=d.alt.toFixed(2)+' m';document.getElementById('spd').textContent=(d.speedKn*1.852).toFixed(1)+' km/h @ '+d.headingDeg.toFixed(0)+'°';document.getElementById('updated').textContent=new Date().toLocaleTimeString();
+  document.getElementById('utc-time').textContent=d.utc&&d.utc.valid?'UTC '+d.utc.iso.replace('T',' ').replace('Z',''):'';
+  if(d.jamming){
+    const l1=document.getElementById('jam-l1');l1.textContent='L1: '+(JAM_LABEL[d.jamming.l1]||'-');l1.className='pill '+(JAM_CLASS[d.jamming.l1]||'muted');
+    const l5=document.getElementById('jam-l5');
+    if(d.jamming.l5>=0){l5.style.display='';l5.textContent='L5: '+(JAM_LABEL[d.jamming.l5]||'-');l5.className='pill '+(JAM_CLASS[d.jamming.l5]||'muted')}else{l5.style.display='none'}
+  }
   updateScatter(d.posHist);updateReference(d.reference);updateMap(d);document.getElementById('connection').textContent='Dashboard connected';document.getElementById('connection').className='footer ok';
 }catch(error){document.getElementById('connection').textContent='Connection error: '+error.message;document.getElementById('connection').className='footer bad'}}
 
 document.getElementById('set-reference').addEventListener('click',async()=>{const status=document.getElementById('reference-status');status.textContent='Checking RTK FIXED status...';try{const response=await fetch('/api/reference',{method:'POST'});if(!response.ok)throw Error('RTK FIXED with fresh corrections required');await update()}catch(error){status.textContent=error.message;status.className='bad'}});
-document.getElementById('reboot-rover').addEventListener('click',async e=>{
-  if(!confirm('Reboot the RTK rover now? Position and correction monitoring will be interrupted briefly.'))return;
-  const button=e.currentTarget;button.disabled=true;button.textContent='Rebooting...';
-  try{const response=await fetch('/api/reboot',{method:'POST'});if(!response.ok)throw Error('HTTP '+response.status);document.getElementById('connection').textContent='Rover is rebooting. Reconnecting...'}
-  catch(error){button.disabled=false;button.textContent='Reboot rover';document.getElementById('connection').textContent='Reboot request failed: '+error.message}
-});
 
 // ── Track recording ───────────────────────────────────────────────────────────
 let trackMap=null,loadedPoints=[],loadedWaypoints=[],replayMarker=null,replayInterval=null,replayIdx=0,speedChart=null,altChart=null,waypointMarkers=[];
@@ -308,7 +350,7 @@ document.getElementById('btn-load-track').addEventListener('click',()=>loadTrack
 document.getElementById('btn-waypoint').addEventListener('click',async()=>{
   const st=document.getElementById('tk-status');
   const r=await fetch('/api/track/waypoint',{method:'POST'});
-  const j=await r.json();st.textContent=j.ok?'Waypoint added!':'RTK FIXED required';st.className=j.ok?'ok':'bad';
+  const j=await r.json();st.textContent=j.ok?'Waypoint added!':'A valid fix is required';st.className=j.ok?'ok':'bad';
   setTimeout(()=>{st.textContent='';st.className='muted'},3000);
 });
 document.getElementById('btn-clear-track').addEventListener('click',async()=>{
@@ -325,6 +367,8 @@ document.getElementById('btn-csv').addEventListener('click',()=>{window.location
 document.getElementById('btn-replay').addEventListener('click',startReplay);
 
 updateTrackInfo();setInterval(updateTrackInfo,10000);
+
+pollSatellites();setInterval(pollSatellites,3000);
 
 update();setInterval(update,2000);
 </script></body></html>
